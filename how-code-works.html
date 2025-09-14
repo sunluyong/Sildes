@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>程序究竟是如何运行的</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Noto Sans SC", sans-serif;
+        background-color: #111827;
+        color: #f9fafb;
+        overflow: hidden;
+      }
+
+      .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+        transform: scale(0.95);
+      }
+
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+      }
+
+      .slide-content {
+        max-width: 1000px;
+        width: 100%;
+        text-align: center;
+      }
+
+      .slide-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #60a5fa;
+        letter-spacing: 1px;
+      }
+
+      .slide-subtitle {
+        font-size: 1.3rem;
+        font-weight: 500;
+        color: #9ca3af;
+        margin-bottom: 2rem;
+      }
+
+      .slide-text {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #d1d5db;
+        text-align: left;
+      }
+
+      .nav-button {
+        position: fixed;
+        bottom: 1.5rem;
+        transform: translateX(-50%);
+        background-color: rgba(31, 41, 55, 0.8);
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 9999px;
+        cursor: pointer;
+        z-index: 10;
+        transition: background-color 0.3s;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.9rem;
+      }
+
+      .nav-button:hover {
+        background-color: #374151;
+      }
+
+      #prev {
+        left: calc(50% - 100px);
+      }
+
+      #next {
+        left: calc(50% + 100px);
+      }
+
+      #slide-counter {
+        position: fixed;
+        bottom: 2.2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #6b7280;
+        font-size: 0.9rem;
+        z-index: 5;
+      }
+
+      /* Animation classes */
+      .fade-in-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+      }
+
+      .fade-in {
+        animation: fadeIn 1s ease-out forwards;
+      }
+
+      .fade-in-delay-1 {
+        animation-delay: 0.2s;
+      }
+
+      .fade-in-delay-2 {
+        animation-delay: 0.4s;
+      }
+
+      .fade-in-delay-3 {
+        animation-delay: 0.6s;
+      }
+
+      .fade-in-delay-4 {
+        animation-delay: 0.8s;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+
+        to {
+          opacity: 1;
+        }
+      }
+
+      .code-block {
+        background-color: #1f2937;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        font-family: "Courier New", Courier, monospace;
+        text-align: left;
+        font-size: 0.9rem;
+        color: #d1d5db;
+        border: 1px solid #374151;
+        margin-top: 1rem;
+      }
+
+      .code-comment {
+        color: #6b7280;
+      }
+
+      .code-keyword {
+        color: #fb923c;
+      }
+
+      .code-variable {
+        color: #60a5fa;
+      }
+
+      .code-function {
+        color: #a78bfa;
+      }
+
+      table {
+        width: 100%;
+        margin-top: 1.5rem;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+      }
+
+      th,
+      td {
+        border: 1px solid #4b5563;
+        padding: 0.8rem;
+        text-align: left;
+      }
+
+      th {
+        background-color: #374151;
+        font-weight: 600;
+      }
+
+      td i {
+        font-style: italic;
+        color: #9ca3af;
+      }
+
+      .highlight {
+        color: #60a5fa;
+        font-weight: bold;
+      }
+
+      .slide-title-smaller {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #60a5fa;
+        letter-spacing: 1px;
+      }
+
+      .slide-title-weaker {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #9ca3af; /* 更弱化的灰色 */
+        letter-spacing: 1px;
+      }
+
+      .slide-title-smallest {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #60a5fa;
+        letter-spacing: 1px;
+      }
+
+      .slide-title-weaker {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #9ca3af; /* 更弱化的颜色 */
+        letter-spacing: 1px;
+      }
+
+      .flowchart {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .flow-arrow {
+        font-size: 1.5rem;
+        color: #9ca3af;
+        transform: rotate(90deg);
+      }
+
+      .flow-item {
+        background: #1f2937;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #4b5563;
+        text-align: center;
+        min-width: 180px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+      }
+
+      .flow-item:hover {
+        transform: translateY(-5px);
+      }
+
+      .translator-diagram {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        max-width: 800px;
+        margin: 1.5rem auto;
+        flex-wrap: wrap;
+      }
+
+      .language-box {
+        background: #1f2937;
+        padding: 1.2rem;
+        border-radius: 0.5rem;
+        border: 1px solid #4b5563;
+        text-align: center;
+        width: 30%;
+        margin-bottom: 1rem;
+      }
+
+      .translator-box {
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        padding: 1.2rem;
+        border-radius: 0.5rem;
+        text-align: center;
+        width: 30%;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        margin-bottom: 1rem;
+      }
+
+      .machine-box {
+        background: #1f2937;
+        padding: 1.2rem;
+        border-radius: 0.5rem;
+        border: 1px solid #4b5563;
+        text-align: center;
+        width: 30%;
+        margin-bottom: 1rem;
+      }
+
+      .arrow {
+        font-size: 1.5rem;
+        color: #9ca3af;
+      }
+
+      .compiler-vs-interpreter {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+      }
+
+      .comparison-box {
+        background: #1f2937;
+        padding: 1.2rem;
+        border-radius: 0.5rem;
+        border: 1px solid #4b5563;
+      }
+
+      .comparison-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #60a5fa;
+      }
+
+      /* 3:4 aspect ratio container for vertical orientation (suitable for Xiaohongshu) */
+      .aspect-3-4 {
+        aspect-ratio: 3 / 4;
+        width: 100%;
+        max-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      }
+
+      /* Xiaohongshu cover specific styles */
+      .xhs-cover {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        text-align: center;
+      }
+
+      .xhs-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(to right, #60a5fa, #38bdf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        line-height: 1.3;
+      }
+
+      .xhs-subtitle {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #e2e8f0;
+        margin-bottom: 2rem;
+        line-height: 1.4;
+      }
+
+      .xhs-decorative-line {
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(to right, #60a5fa, #38bdf8);
+        border-radius: 2px;
+        margin: 0 auto 2rem;
+      }
+
+      .xhs-bottom-text {
+        position: absolute;
+        bottom: 2rem;
+        font-size: 1.1rem;
+        color: #94a3b8;
+        font-weight: 500;
+      }
+
+      .xhs-icon {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Vertical orientation adjustments */
+      @media (orientation: portrait) {
+        .slide {
+          padding: 1.5rem;
+        }
+
+        .slide-title {
+          font-size: 2rem;
+        }
+
+        .slide-subtitle {
+          font-size: 1.1rem;
+        }
+
+        .slide-text {
+          font-size: 1rem;
+        }
+
+        .code-block {
+          font-size: 0.8rem;
+          padding: 0.8rem;
+        }
+      }
+
+      .memory-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin: 1.5rem 0;
+      }
+
+      .memory-section {
+        display: flex;
+        align-items: center;
+        padding: 0.8rem;
+        border-radius: 0.5rem;
+        background: #1f2937;
+        border: 1px solid #4b5563;
+      }
+
+      .memory-color-box {
+        width: 20px;
+        height: 20px;
+        border-radius: 0.25rem;
+        margin-right: 1rem;
+      }
+
+      .text-highlights {
+        background: rgba(96, 165, 250, 0.1);
+        border-left: 4px solid #60a5fa;
+        padding: 1rem;
+        margin: 1rem auto;
+        border-radius: 0 0.5rem 0.5rem 0;
+        width: 80%;
+        max-width: 800px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Slide 1: Title -->
+    <div class="slide active">
+      <div class="slide-content text-center">
+        <h1 class="text-5xl font-bold text-white mb-4 fade-in-up">
+          “为什么大学没教会你编程？”
+        </h1>
+        <div class="mt-12 fade-in-up fade-in-delay-2">
+          <svg
+            viewBox="0 0 800 400"
+            class="rounded-lg mx-auto shadow-2xl shadow-blue-500/20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path fill="#111827" d="M0 0h800v400H0z" />
+            <text
+              x="50%"
+              y="50%"
+              dominant-baseline="middle"
+              text-anchor="middle"
+              font-family="'Noto Sans SC', sans-serif"
+              font-size="48"
+              fill="#60a5fa"
+              font-weight="bold"
+            >
+              理解程序从源代码到运行的全过程
+            </text>
+            <g opacity="0.3">
+              <path
+                d="M100 200 L150 150 L200 250 L250 180 L300 220 L350 160 L400 240"
+                stroke="#60a5fa"
+                stroke-width="2"
+                fill="none"
+                stroke-linecap="round"
+              />
+              <circle cx="100" cy="200" r="4" fill="#60a5fa" />
+              <circle cx="150" cy="150" r="4" fill="#60a5fa" />
+              <circle cx="200" cy="250" r="4" fill="#60a5fa" />
+              <circle cx="250" cy="180" r="4" fill="#60a5fa" />
+              <circle cx="300" cy="220" r="4" fill="#60a5fa" />
+              <circle cx="350" cy="160" r="4" fill="#60a5fa" />
+              <circle cx="400" cy="240" r="4" fill="#60a5fa" />
+              <path
+                d="M700 200 L650 250 L600 150 L550 220 L500 180 L450 240 L400 160"
+                stroke="#60a5fa"
+                stroke-width="2"
+                fill="none"
+                stroke-linecap="round"
+              />
+              <circle cx="700" cy="200" r="4" fill="#60a5fa" />
+              <circle cx="650" cy="250" r="4" fill="#60a5fa" />
+              <circle cx="600" cy="150" r="4" fill="#60a5fa" />
+              <circle cx="550" cy="220" r="4" fill="#60a5fa" />
+              <circle cx="500" cy="180" r="4" fill="#60a5fa" />
+              <circle cx="450" cy="240" r="4" fill="#60a5fa" />
+              <circle cx="400" cy="160" r="4" fill="#60a5fa" />
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2: University Curriculum Issues -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title fade-in-up">
+          课程设计通病：没教我们程序是怎么运行的
+        </h2>
+        <p class="slide-text mt-6 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          国内大学的计算机课程体系，通常是先学 C
+          语言语法，再学数据结构，后续跟上操作系统、计算机组成原理……
+          每门课独立授课，进而形成了一个个<span class="highlight"
+            >知识孤岛</span
+          >
+        </p>
+        <p class="slide-text mt-6 w-4/5 mx-auto fade-in-up fade-in-delay-4">
+          其实无论是计算机组成的硬件、操作系统的任务调度，还是经典的数据结构，它们存在的终极目的是：
+          <span class="highlight">让程序可以高效、稳定地运行</span>。
+          当这些"底层逻辑"被割裂在不同的课程里，学生学到的就只是"语法规则"和"算法模板"，而非"如何驱动一台计算机"。<br />
+          久而久之，数据结构成了“背诵复杂度”，操作系统成了“默写调度算法”。这些本应是程序员手中强大“工具”的知识，在许多人眼里，最终沦为了“无用的抽象理论”。
+        </p>
+        <div class="text-highlights mt-6 fade-in-up fade-in-delay-3">
+          <p class="slide-text">
+            大学课程最大的问题，就是<span class="highlight"
+              >没把知识串联起来</span
+            >——它给了你最顶级的发动机、轴承和方向盘，却没有教你如何将它们组装成一辆超级跑车。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: The Journey Overview -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title fade-in-up">一个程序的从诞生到执行完成的旅程</h2>
+        <p class="slide-text mt-8 w-4/5 mx-auto fade-in-up fade-in-delay-6">
+          理解这个旅程的核心步骤，不但可以帮我们更好的写的每行代码的作用，还可以了解为什么需要学习编译原理、计算机组成、操作系统等课程。
+        </p>
+
+        <div class="flowchart mt-12 fade-in-up fade-in-delay-7">
+          <div class="flow-item">
+            <div class="text-xl font-bold text-blue-400">
+              1. 编译源代码为二进制指令
+            </div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-item">
+            <div class="text-xl font-bold text-green-400">
+              2. 操作系统加载指令到内存
+            </div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-item">
+            <div class="text-xl font-bold text-purple-400">
+              3. CPU 逐条执行指令
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4: Step 1 - Compilation Overview -->
+    <div class="slide">
+      <div class="slide-content relative">
+        <h2 class="slide-title text-center fade-in-up">
+          第一步：从源代码到可执行二进制指令
+        </h2>
+        <img
+          src="https://cdn.nlark.com/yuque/0/2025/png/87727/1757730536576-528a86e8-553c-4053-a85f-d7cbfe7381e8.png"
+          alt="Compilation Process"
+          class="mx-auto my-4 rounded-lg fade-in-up fade-in-delay-1"
+          style="max-height: 40vh"
+        />
+        <div class="relative"></div>
+        <ul
+          class="slide-text list-disc list-inside w-4/5 mx-auto space-y-2 fade-in-up fade-in-delay-2"
+        >
+          <li>
+            <span class="font-bold">预处理:</span> 代码"整理"，处理
+            `#include`、宏定义、删除注释。
+          </li>
+          <li>
+            <span class="font-bold">编译:</span>
+            把源代码"翻译"成汇编代码。
+          </li>
+          <li>
+            <span class="font-bold">汇编:</span>
+            将汇编代码转为二进制机器码。
+          </li>
+          <li>
+            <span class="font-bold">链接:</span>
+            "组装"程序与库，分配内存地址，打包为可执行文件。
+          </li>
+        </ul>
+        <!-- 三个学科色块 -->
+        <div class="flex gap-4 absolute bottom-8 right-8">
+          <div class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg">
+            <div class="font-bold">编译原理</div>
+          </div>
+          <div class="bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
+            <div class="font-bold">计算机组成</div>
+          </div>
+          <div class="bg-purple-500 text-white px-4 py-2 rounded-lg shadow-lg">
+            <div class="font-bold">操作系统</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 9: Objdump -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-weaker text-center fade-in-up">
+          源码与反编译对比
+        </h2>
+        <div class="flex gap-4 mt-6">
+          <!-- 源码 -->
+          <div class="w-1/2">
+            <p class="slide-subtitle text-center fade-in-up fade-in-delay-1">
+              源代码 (C语言)
+            </p>
+            <div class="code-block fade-in-up fade-in-delay-2">
+              <pre>
+int main() {
+    int a = 1;
+    int b = 2;
+    int sum = a + b;
+    return sum;
+}
+              </pre>
+            </div>
+          </div>
+
+          <!-- 反编译代码 -->
+          <div class="w-1/2">
+            <p class="slide-subtitle text-center fade-in-up fade-in-delay-1">
+              反汇编代码 (ARM64)
+            </p>
+            <div class="code-block fade-in-up fade-in-delay-2">
+              <pre>
+0000000100003f74 &lt;_main&gt;:
+100003f74: d10043ff  sub sp, sp, #16
+100003f78: b9000fff  str wzr, [sp, #12]
+100003f7c: 52800028  mov w8, #1
+100003f80: b9000be8  str w8, [sp, #8]
+100003f84: 52800048  mov w8, #2
+100003f88: b90007e8  str w8, [sp, #4]
+100003f8c: b9400be8  ldr w8, [sp, #8]
+100003f90: b94007e9  ldr w9, [sp, #4]
+100003f94: 0b090108  add w8, w8, w9
+100003f98: b90003e8  str w8, [sp]
+100003f9c: b94003e0  ldr w0, [sp]
+100003fa0: 910043ff  add sp, sp, #16
+100003fa4: d65f03c0  ret
+              </pre>
+            </div>
+          </div>
+        </div>
+        <p class="slide-text mt-4 fade-in-up fade-in-delay-3">
+          格式：<span class="highlight">内存地址: 机器码 汇编指令</span
+          >。这让我们能以人类可读的方式，看到机器真正执行的内容。
+        </p>
+      </div>
+    </div>
+
+    <!-- Slide 10: Objdump Explanation -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-weaker text-center fade-in-up">
+          解析第一条指令
+        </h2>
+        <div class="code-block w-4/5 mx-auto mt-6 fade-in-up fade-in-delay-1">
+          <pre style="line-height: 0">
+          100003f74: d10043ff     sub sp, sp, #16
+          </pre>
+        </div>
+        <ul
+          class="slide-text list-disc list-inside w-4/5 mx-auto space-y-3 mt-6 fade-in-up fade-in-delay-2"
+        >
+          <li>
+            <span class="font-bold text-blue-400">100003f74：</span
+            >表示这条指令存储在内存地址 `100003f74`
+          </li>
+          <li>
+            <span class="font-bold text-green-400">d10043ff：</span
+            >这条指令的机器码表示。这是 `sub sp, sp, #16`
+            这条操作的二进制表示（用十六进制显示以缩短长度）。
+          </li>
+          <li>
+            <span class="font-bold text-yellow-400">sub sp, sp, #16：</span
+            >是这条指令的汇编语言形式的表示，objdump 显示出来是为了方便人理解
+          </li>
+        </ul>
+        <div class="text-highlights mt-6 fade-in-up fade-in-delay-3">
+          <p class="slide-text">
+            这一行完整地告诉我们：在内存地址
+            <span class="highlight">100003f74</span> 处，存放了一条机器码
+            <span class="highlight">d10043ff</span>，它的作用是执行
+            <span class="highlight">sp = sp - 16</span> 操作。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 11: Step 2 - Loading Overview -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title text-center fade-in-up">第二步：程序载入内存</h2>
+        <img
+          src="https://cdn.nlark.com/yuque/0/2025/png/87727/1757735278763-e744ee95-37cb-4213-afbd-91f368a64fb3.png"
+          alt="Memory Hierarchy"
+          class="mx-auto my-4 rounded-lg fade-in-up fade-in-delay-1"
+          style="max-height: 45vh"
+        />
+      </div>
+    </div>
+
+    <!-- Slide 12: Why Memory is Needed -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-weaker text-center fade-in-up">
+          为什么需要内存？
+        </h2>
+        <div class="text-highlights mt-4 fade-in-up fade-in-delay-1">
+          <p class="slide-text">
+            核心原因在于<span class="highlight">速度</span>。CPU
+            的运算速度以纳秒计，而硬盘的读写速度要慢上几个数量级。
+          </p>
+        </div>
+        <p class="slide-text mt-6 w-4/5 mx-auto fade-in-up fade-in-delay-2">
+          如果 CPU
+          直接从硬盘读指令，那它绝大部分时间都会在"等米下锅"，性能将大打折扣。内存作为高速存储器，其速度与
+          CPU 更为匹配，能确保指令和数据被"喂"得足够快。
+        </p>
+        <div
+          class="flex justify-center items-baseline gap-8 mt-8 text-center fade-in-up fade-in-delay-3"
+        >
+          <div>
+            <p class="text-2xl text-gray-400">硬盘</p>
+            <p class="text-4xl font-bold">~10ms</p>
+            <p class="text-lg mt-2">读取时间</p>
+          </div>
+          <div class="text-5xl text-gray-600">vs</div>
+          <div>
+            <p class="text-2xl text-blue-400">内存</p>
+            <p class="text-4xl font-bold">~100ns</p>
+            <p class="text-lg mt-2">读取时间</p>
+          </div>
+          <div class="text-5xl text-gray-600">vs</div>
+          <div>
+            <p class="text-2xl text-green-400">CPU</p>
+            <p class="text-4xl font-bold">~1ns</p>
+            <p class="text-lg mt-2">处理时间</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 13: Memory Size Importance -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-weaker text-center fade-in-up">
+          内存大小的重要性
+        </h2>
+        <p class="slide-text mt-6 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          <span class="highlight">内存大小</span
+          >之所以重要，是因为更大的内存意味着操作系统可以把更多的程序和数据"常驻"其中，从而大大减少从慢速硬盘加载的次数。
+        </p>
+        <p class="slide-text mt-4 w-4/5 mx-auto fade-in-up fade-in-delay-2">
+          硬盘访问是性能瓶颈，减少访问，自然程序启动更快，运行更流畅。
+        </p>
+        <div class="text-highlights mt-6 fade-in-up fade-in-delay-3">
+          <p class="slide-text">
+            为何不用内存完全替代硬盘？主要受限于<span class="highlight"
+              >成本</span
+            >和<span class="highlight">持久性</span>。
+          </p>
+        </div>
+        <ul
+          class="slide-text list-disc list-inside w-4/5 mx-auto space-y-2 mt-4 fade-in-up fade-in-delay-4"
+        >
+          <li>内存价格昂贵</li>
+          <li>断电后数据会全部丢失</li>
+          <li>硬盘提供了大容量、低成本和数据持久化的能力</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-weaker text-center fade-in-up">
+          言归正传：双击程序图标时发生了什么？
+        </h2>
+        <p class="slide-text mt-8 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          当你双击程序图标时，操作系统会为你做以下几件事：
+        </p>
+
+        <div
+          class="memory-layout fade-in-up fade-in-delay-2"
+          style="max-width: 800px; margin: 0 auto"
+        >
+          <div class="memory-section">
+            <div
+              class="memory-color-box"
+              style="background-color: #38bdf8"
+            ></div>
+            <div class="text-left">
+              <p class="font-bold text-blue-400">1. 创建进程</p>
+              <p class="text-sm">
+                操作系统为你运行的程序创建一个“进程”（Process），这是一个程序运行的实体。
+              </p>
+            </div>
+          </div>
+
+          <div class="memory-section">
+            <div
+              class="memory-color-box"
+              style="background-color: #fbbf24"
+            ></div>
+            <div class="text-left">
+              <p class="font-bold text-yellow-400">2. 分配虚拟内存</p>
+              <p class="text-sm">
+                操作系统为进程分配一个独立的、私有的虚拟内存空间，让每个程序在自己独立空间内运行。
+              </p>
+            </div>
+          </div>
+
+          <div class="memory-section">
+            <div
+              class="memory-color-box"
+              style="background-color: #f87171"
+            ></div>
+            <div class="text-left">
+              <p class="font-bold text-red-400">3. 规划内存布局</p>
+              <p class="text-sm">划分代码段、数据段、堆、栈等区域。</p>
+            </div>
+          </div>
+
+          <div class="memory-section">
+            <div
+              class="memory-color-box"
+              style="background-color: #60a5fa"
+            ></div>
+            <div class="text-left">
+              <p class="font-bold text-blue-400">4. 建立映射</p>
+              <p class="text-sm">
+                操作系统读取可执行文件的信息，并建立虚拟内存地址与硬盘上文件内容的映射关系。
+              </p>
+            </div>
+          </div>
+
+          <div class="memory-section">
+            <div
+              class="memory-color-box"
+              style="background-color: #a78bfa"
+            ></div>
+            <div class="text-left">
+              <p class="font-bold text-purple-400">5. 移交控制权</p>
+              <p class="text-sm">
+                操作系统将 CPU 的程序计数器（Program Counter,
+                PC）指向程序的入口地址，然后将 CPU 的控制权正式交给该进程。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p class="slide-text mt-6 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          至此，程序准备就绪，CPU
+          将从程序计数器指向的地址开始，开启它的生命周期。
+        </p>
+      </div>
+    </div>
+
+    <!-- Slide 14: Memory Layout -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-weaker text-center fade-in-up">
+          操作系统的"舞台搭建"
+        </h2>
+        <p class="slide-subtitle text-center fade-in-up fade-in-delay-1">
+          为程序划分独立的虚拟内存空间
+        </p>
+        <div class="memory-layout fade-in-up fade-in-delay-2">
+          <div class="memory-section">
+            <div
+              class="memory-color-box"
+              style="background-color: #38bdf8"
+            ></div>
+            <div class="text-left">
+              <p class="font-bold text-blue-400">代码段 (.text)</p>
+              <p class="text-sm">存放CPU指令</p>
+            </div>
+          </div>
+          <div class="memory-section">
+            <div
+              class="memory-color-box"
+              style="background-color: #fbbf24"
+            ></div>
+            <div class="text-left">
+              <p class="font-bold text-yellow-400">数据段 (.data / .bss)</p>
+              <p class="text-sm">存放全局变量和静态变量</p>
+            </div>
+          </div>
+          <div class="memory-section">
+            <div
+              class="memory-color-box"
+              style="background-color: #f87171"
+            ></div>
+            <div class="text-left">
+              <p class="font-bold text-red-400">堆 (Heap)</p>
+              <p class="text-sm">用于动态内存分配 (`malloc`)</p>
+            </div>
+          </div>
+          <div class="memory-section">
+            <div
+              class="memory-color-box"
+              style="background-color: #60a5fa"
+            ></div>
+            <div class="text-left">
+              <p class="font-bold text-blue-400">栈 (Stack)</p>
+              <p class="text-sm">用于函数调用，存放局部变量</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 15: Stack vs Heap -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-weaker text-center fade-in-up">
+          透视代码：指针与内存
+        </h2>
+        <p class="slide-text mt-8 w-4/5 mx-auto fade-in-up fade-in-delay-2">
+          我们知道 C 语言的学习堪称地狱难度，但理解了指针，就学会了 C
+          语言的一半。而指针的本质，就是<span class="highlight"
+            >一个存储着内存地址的变量</span
+          >。大部分同学理解不了指针，也理解不了数组变量为什么也是个指针，正是因为不理解内存在程序运行过程中的作用
+        </p>
+        <div class="flex gap-4">
+          <div class="w-1/2 code-block text-sm fade-in-up fade-in-delay-1">
+            <pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main() {
+    // 栈变量: 自动分配和释放
+    int stack_var = 10;
+    
+    // 堆变量: 手动分配和释放
+    int* heap_var = (int*)malloc(sizeof(int));
+    *heap_var = 20;
+    
+    printf("栈: %d, 地址: %p\n", stack_var, &stack_var);
+    printf("堆: %d, 地址: %p\n", *heap_var, heap_var);
+    
+    free(heap_var);
+    return 0;
+}
+              </pre
+            >
+          </div>
+          <div
+            class="w-1/2 flex items-center justify-center fade-in-up fade-in-delay-2"
+          >
+            <img
+              src="https://cdn.nlark.com/yuque/0/2025/png/87727/1757737712898-a0f82a9b-5d31-443a-bc5f-822aa0df768d.png"
+              alt="Stack and Heap"
+              class="rounded-lg"
+              style="max-height: 60vh"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 16: Step 3 - Execution Overview -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title text-center fade-in-up">第三步：CPU 执行指令</h2>
+        <ol
+          class="slide-text list-decimal list-inside w-4/5 mx-auto space-y-4 mt-6 fade-in-up fade-in-delay-1"
+        >
+          <li>
+            <span class="font-bold">取指令：</span>CPU 内部有一个叫<span
+              class="highlight"
+              >程序计数器 (PC)</span
+            >
+            的寄存器，它保存着下一条待执行指令的内存地址。
+            <p class="text-sm text-gray-400 mt-1">
+              CPU 根据 PC 的地址，从内存中取出指令，存放到<span
+                class="highlight"
+                >指令寄存器 (IR)</span
+              >
+              中。
+            </p>
+          </li>
+          <li>
+            <span class="font-bold">解码指令：</span>CPU 的<span
+              class="highlight"
+              >指令解码单元</span
+            >会分析指令寄存器中的内容。
+            <p class="text-sm text-gray-400 mt-1">
+              搞清楚这条指令是要"做什么"（操作码，如加法、加载数据）以及"对谁做"（操作数，如寄存器编号、内存地址）。
+            </p>
+          </li>
+          <li>
+            <span class="font-bold">执行指令：</span>解码后，CPU 的<span
+              class="highlight"
+              >算术逻辑单元 (ALU)</span
+            >
+            会执行具体的计算或逻辑判断。
+            <p class="text-sm text-gray-400 mt-1">
+              执行过程会用到 CPU 内部的高速存储单元——<span class="highlight"
+                >寄存器</span
+              >，用于暂存数据。
+            </p>
+          </li>
+          <li>
+            <span class="font-bold">访存/写回：</span
+            >如果指令需要从内存读取数据，CPU 会访问内存；如果计算产生了结果，CPU
+            会将结果写回寄存器或内存中。
+          </li>
+          <li>
+            <span class="font-bold">更新 PC：</span
+            >一条指令执行完毕后，程序计数器 (PC) 会更新，指向下一条指令的地址。
+            <p class="text-sm text-gray-400 mt-1">
+              如果是跳转指令，PC 则会直接更新为目标地址。
+            </p>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Slide 17: CPU Execution Cycle -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-weaker text-center fade-in-up">CPU 执行循环</h2>
+        <img
+          src="https://cdn.nlark.com/yuque/0/2025/png/87727/1757734394604-c6d1e3e4-47c9-4254-8c18-174d3eceea32.png"
+          alt="CPU Cycle"
+          class="mx-auto my-4 rounded-lg fade-in-up fade-in-delay-1"
+          style="max-height: 50vh"
+        />
+        <p
+          class="slide-text text-center w-4/5 mx-auto fade-in-up fade-in-delay-2"
+        >
+          CPU永不疲倦地重复
+          <span class="highlight">取指 → 解码 → 执行</span>
+          的循环，直到程序结束。
+        </p>
+      </div>
+    </div>
+
+    <!-- Slide 18: Mental Model -->
+    <div class="slide">
+      <div class="slide-content text-center">
+        <h2 class="slide-title fade-in-up">建立"程序运行心智模型"</h2>
+        <p class="slide-subtitle fade-in-up fade-in-delay-1">
+          为什么理解这个过程如此重要？
+        </p>
+        <p class="slide-text mt-6 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          即使现在不能完全掌握本文的所有细节，但当你开始关心"<span
+            class="highlight"
+            >程序如何运行</span
+          >"时，就已经走在了大多数编程学习者的前面。慢慢地，你会建立起属于自己的"<span
+            class="highlight"
+            >程序运行心智模型</span
+          >"：
+        </p>
+        <ul
+          class="slide-text list-disc list-inside w-4/5 mx-auto space-y-3 mt-6 fade-in-up fade-in-delay-2"
+        >
+          <li>
+            再看到一段代码，你能"<span class="highlight">透过语法看到内存</span
+            >"
+          </li>
+          <li>
+            再看到函数调用，你能"<span class="highlight"
+              >透过函数看到系统调用</span
+            >"
+          </li>
+          <li>
+            再遇到bug，你能"<span class="highlight">透过现象看底层原因</span>"
+          </li>
+        </ul>
+        <div class="text-highlights mt-8 fade-in-up fade-in-delay-3">
+          <p class="slide-text">
+            到那时，曾经觉得"<span class="highlight">没用</span
+            >"的计算机组成原理、操作系统知识，
+            都会变成你排查问题、优化性能的"<span class="highlight">利器</span
+            >"。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 22: Q&A -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title fade-in-up">下一节：这么多编程语言该怎么选？</h2>
+        <p class="text-3xl mt-20 text-sky-400 fade-in-up fade-in-delay-1">
+          敬请期待
+        </p>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div id="slide-counter">1 / 23</div>
+    <button id="prev" class="nav-button">← 上一页</button>
+    <button id="next" class="nav-button">下一页 →</button>
+
+    <script>
+      const slides = document.querySelectorAll(".slide");
+      const prevButton = document.getElementById("prev");
+      const nextButton = document.getElementById("next");
+      const slideCounter = document.getElementById("slide-counter");
+
+      // Get slide number from URL parameter or default to 0
+      function getCurrentSlideFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const slideParam = urlParams.get("slide");
+        return slideParam ? parseInt(slideParam) - 1 : 0;
+      }
+
+      // Update URL with current slide number
+      function updateURL(slideIndex) {
+        const url = new URL(window.location);
+        url.searchParams.set("slide", slideIndex + 1);
+        window.history.replaceState({}, "", url);
+      }
+
+      let currentSlide = Math.max(
+        0,
+        Math.min(getCurrentSlideFromURL(), slides.length - 1)
+      );
+      const totalSlides = slides.length;
+
+      function updateSlides() {
+        slides.forEach((slide, index) => {
+          if (index === currentSlide) {
+            slide.classList.add("active");
+          } else {
+            slide.classList.remove("active");
+          }
+        });
+        slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+
+        // Toggle button visibility
+        prevButton.style.display = currentSlide === 0 ? "none" : "block";
+        nextButton.style.display =
+          currentSlide === totalSlides - 1 ? "none" : "block";
+
+        // Update URL to reflect current slide
+        updateURL(currentSlide);
+      }
+
+      nextButton.addEventListener("click", () => {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateSlides();
+        }
+      });
+
+      prevButton.addEventListener("click", () => {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateSlides();
+        }
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          if (currentSlide < totalSlides - 1) {
+            currentSlide++;
+            updateSlides();
+          }
+        } else if (e.key === "ArrowLeft") {
+          if (currentSlide > 0) {
+            currentSlide--;
+            updateSlides();
+          }
+        }
+      });
+
+      // Handle browser back/forward buttons
+      window.addEventListener("popstate", () => {
+        currentSlide = Math.max(
+          0,
+          Math.min(getCurrentSlideFromURL(), slides.length - 1)
+        );
+        updateSlides();
+      });
+
+      // Initialize
+      updateSlides();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编程入门第一课：理解编程的本质</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #111827;
+            color: #F9FAFB;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+            transform: scale(0.95);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        .slide-content {
+            max-width: 1000px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .slide-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #38bdf8;
+            letter-spacing: 1px;
+        }
+
+        .slide-subtitle {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #9ca3af;
+            margin-bottom: 2rem;
+        }
+
+        .slide-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #d1d5db;
+            text-align: left;
+        }
+
+        .nav-button {
+            position: fixed;
+            bottom: 1.5rem;
+            transform: translateX(-50%);
+            background-color: rgba(31, 41, 55, 0.8);
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.3s;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+
+        .nav-button:hover {
+            background-color: #374151;
+        }
+
+        #prev {
+            left: calc(50% - 80px);
+        }
+
+        #next {
+            left: calc(50% + 80px);
+        }
+
+        #slide-counter {
+            position: fixed;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #6b7280;
+            font-size: 0.9rem;
+            z-index: 5;
+        }
+
+        /* Animation classes */
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .fade-in {
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        .fade-in-delay-1 {
+            animation-delay: 0.2s;
+        }
+
+        .fade-in-delay-2 {
+            animation-delay: 0.4s;
+        }
+
+        .fade-in-delay-3 {
+            animation-delay: 0.6s;
+        }
+
+        .fade-in-delay-4 {
+            animation-delay: 0.8s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .code-block {
+            background-color: #1f2937;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: left;
+            font-size: 0.9rem;
+            color: #d1d5db;
+            border: 1px solid #374151;
+            margin-top: 1rem;
+        }
+
+        .code-comment {
+            color: #6b7280;
+        }
+
+        .code-keyword {
+            color: #fb923c;
+        }
+
+        .code-variable {
+            color: #60a5fa;
+        }
+
+        .code-function {
+            color: #a78bfa;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 1.5rem;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            border: 1px solid #4b5563;
+            padding: 0.8rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #374151;
+            font-weight: 600;
+        }
+
+        td i {
+            font-style: italic;
+            color: #9ca3af;
+        }
+
+        .highlight {
+            color: #38bdf8;
+            font-weight: bold;
+        }
+
+        .flowchart {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .flow-item {
+            background: #1f2937;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.5rem;
+            border: 1px solid #4b5563;
+            font-size: 0.9rem;
+        }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: #9ca3af;
+        }
+
+        .translator-diagram {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 1.5rem auto;
+            flex-wrap: wrap;
+        }
+
+        .language-box {
+            background: #1f2937;
+            padding: 1.2rem;
+            border-radius: 0.5rem;
+            border: 1px solid #4b5563;
+            text-align: center;
+            width: 30%;
+            margin-bottom: 1rem;
+        }
+
+        .translator-box {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+            padding: 1.2rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            width: 30%;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 1rem;
+        }
+
+        .machine-box {
+            background: #1f2937;
+            padding: 1.2rem;
+            border-radius: 0.5rem;
+            border: 1px solid #4b5563;
+            text-align: center;
+            width: 30%;
+            margin-bottom: 1rem;
+        }
+
+        .arrow {
+            font-size: 1.5rem;
+            color: #9ca3af;
+        }
+
+        .compiler-vs-interpreter {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .comparison-box {
+            background: #1f2937;
+            padding: 1.2rem;
+            border-radius: 0.5rem;
+            border: 1px solid #4b5563;
+        }
+
+        .comparison-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #38bdf8;
+        }
+
+        /* 3:4 aspect ratio container for vertical orientation (suitable for Xiaohongshu) */
+        .aspect-3-4 {
+            aspect-ratio: 3 / 4;
+            width: 100%;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Xiaohongshu cover specific styles */
+        .xhs-cover {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .xhs-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #38bdf8, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            line-height: 1.3;
+        }
+
+        .xhs-subtitle {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 2rem;
+            line-height: 1.4;
+        }
+
+        .xhs-decorative-line {
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(to right, #38bdf8, #60a5fa);
+            border-radius: 2px;
+            margin: 0 auto 2rem;
+        }
+
+        .xhs-bottom-text {
+            position: absolute;
+            bottom: 2rem;
+            font-size: 1.1rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .xhs-icon {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Vertical orientation adjustments */
+        @media (orientation: portrait) {
+            .slide {
+                padding: 1.5rem;
+            }
+
+            .slide-title {
+                font-size: 2rem;
+            }
+
+            .slide-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .slide-text {
+                font-size: 1rem;
+            }
+
+            .code-block {
+                font-size: 0.8rem;
+                padding: 0.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 新增 Slide 0: 封面 (适合小红书的3:4竖屏封面) -->
+    <div class="slide active">
+        <div class="aspect-3-4">
+            <div class="xhs-cover">
+                <div class="xhs-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                    </svg>
+                </div>
+                <h1 class="xhs-title">
+                    如果觉得<br>怎么也学不会编程
+                </h1>
+                <div class="xhs-decorative-line"></div>
+                <h2 class="xhs-subtitle">
+                    可能是因为<br>没有理解编程的本质
+                </h2>
+                <div class="xhs-bottom-text">编程入门第一课</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 1: Title -->
+    <div class="slide">
+        <div class="slide-content text-center">
+            <h1 class="text-6xl font-bold text-white mb-4 fade-in-up">编程入门第一课</h1>
+            <p class="text-3xl text-sky-400 fade-in-up fade-in-delay-1">编程的本质</p>
+            <div class="mt-12 fade-in-up fade-in-delay-2">
+                <svg viewBox="0 0 800 400" class="rounded-lg mx-auto shadow-2xl shadow-sky-500/20" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#111827" d="M0 0h800v400H0z" />
+                    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
+                        font-family="'Noto Sans SC', sans-serif" font-size="48" fill="#38bdf8"
+                        font-weight="bold">理解计算机的思维模式</text>
+                    <g opacity="0.3">
+                        <path d="M100 200 L150 150 L200 250 L250 180 L300 220 L350 160 L400 240" stroke="#38bdf8"
+                            stroke-width="2" fill="none" stroke-linecap="round" />
+                        <circle cx="100" cy="200" r="4" fill="#38bdf8" />
+                        <circle cx="150" cy="150" r="4" fill="#38bdf8" />
+                        <circle cx="200" cy="250" r="4" fill="#38bdf8" />
+                        <circle cx="250" cy="180" r="4" fill="#38bdf8" />
+                        <circle cx="300" cy="220" r="4" fill="#38bdf8" />
+                        <circle cx="350" cy="160" r="4" fill="#38bdf8" />
+                        <circle cx="400" cy="240" r="4" fill="#38bdf8" />
+                        <path d="M700 200 L650 250 L600 150 L550 220 L500 180 L450 240 L400 160" stroke="#38bdf8"
+                            stroke-width="2" fill="none" stroke-linecap="round" />
+                        <circle cx="700" cy="200" r="4" fill="#38bdf8" />
+                        <circle cx="650" cy="250" r="4" fill="#38bdf8" />
+                        <circle cx="600" cy="150" r="4" fill="#38bdf8" />
+                        <circle cx="550" cy="220" r="4" fill="#38bdf8" />
+                        <circle cx="500" cy="180" r="4" fill="#38bdf8" />
+                        <circle cx="450" cy="240" r="4" fill="#38bdf8" />
+                        <circle cx="400" cy="160" r="4" fill="#38bdf8" />
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Introduction -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title fade-in-up">你好，未来的程序员！</h2>
+            <p class="slide-text fade-in-up fade-in-delay-1">
+                在我们开始学习任何一门具体的编程语言（比如 Python 或 Java）之前，花几分钟<span
+                    class="highlight">理解编程的本质</span>，以及计算机的“真实面貌”，会让编程学习之路事半功倍。
+            </p>
+            <p class="slide-text mt-4 fade-in-up fade-in-delay-2">
+                我们从计算机最核心的特性开始，探索几乎所有编程语言背后类似的工作原理。
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 3: Computer is a "fool" -->
+    <div class="slide">
+        <div class="slide-content flex items-center gap-8">
+            <div class="w-2/3 text-left">
+                <h2 class="slide-title fade-in-up">核心概念一</h2>
+                <p class="text-3xl text-gray-300 fade-in-up fade-in-delay-1">计算机不会思考，<br>它只是一个<span
+                        class="highlight">听话的“傻瓜”</span></p>
+            </div>
+            <div class="w-1/3 fade-in-up fade-in-delay-2">
+                <svg viewBox="0 0 300 300" class="rounded-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="150" cy="150" r="150" fill="#1f2937" />
+                    <rect x="90" y="120" width="120" height="90" rx="10" fill="#374151" />
+                    <rect x="100" y="130" width="100" height="70" rx="5" fill="#111827" />
+                    <circle cx="130" cy="165" r="8" fill="#9ca3af" />
+                    <circle cx="170" cy="165" r="8" fill="#9ca3af" />
+                    <path d="M140 185 Q150 175 160 185" stroke="#9ca3af" stroke-width="4" fill="none" />
+                    <path d="M150 60 L150 90" stroke="#9ca3af" stroke-width="6" />
+                    <text x="150" y="50" text-anchor="middle" font-size="40" fill="#9ca3af" font-weight="bold">?</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: The Equation Problem -->
+    <div class="slide">
+        <div class="slide-content">
+            <p class="slide-subtitle fade-in-up">我们日常使用的软件看起来非常智能，但...</p>
+            <h2 class="slide-title text-4xl fade-in-up fade-in-delay-1">
+                计算机连 `2x + 3 = 5` 都无法自主解决
+            </h2>
+            <p class="slide-text mt-8 w-2/3 mx-auto fade-in-up fade-in-delay-2">
+                这是为什么？因为计算机的“世界”里，并不存在“解方程”这样的抽象概念。它的能力仅限于执行人类提前设定好的、<span class="highlight">极其基础的指令</span>。
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 5: Instruction Set -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title text-4xl fade-in-up">计算机能听懂的“基础指令”</h2>
+            <table class="slide-text fade-in-up fade-in-delay-1">
+                <thead>
+                    <tr>
+                        <th>指令类别</th>
+                        <th>说明</th>
+                        <th>示例指令</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><i>算术运算</i></td>
+                        <td>执行基本的数学计算</td>
+                        <td><code>ADD</code>, <code>SUB</code>, <code>MUL</code>, <code>DIV</code></td>
+                    </tr>
+                    <tr>
+                        <td><i>数据传输</i></td>
+                        <td>在内存、寄存器间移动数据</td>
+                        <td><code>MOV</code>, <code>PUSH</code>, <code>POP</code></td>
+                    </tr>
+                    <tr>
+                        <td><i>程序控制</i></td>
+                        <td>控制程序流程，如跳转、调用</td>
+                        <td><code>JMP</code>, <code>CALL</code>, <code>RET</code></td>
+                    </tr>
+                    <tr>
+                        <td><i>数值比较</i></td>
+                        <td>比较两个数值，设置标志位</td>
+                        <td><code>CMP</code>, <code>TEST</code></td>
+                    </tr>
+                    <tr>
+                        <td><i>逻辑/位操作</i></td>
+                        <td>执行逻辑运算，如与、或、移位</td>
+                        <td><code>AND</code>, <code>OR</code>, <code>NOT</code>, <code>SHL</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Slide 6: Solving the Equation - Human Steps -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title text-4xl fade-in-up">如何“教会”计算机解方程？</h2>
+            <p class="slide-subtitle fade-in-up fade-in-delay-1">我们必须将解题过程拆解成它能懂的指令：</p>
+            <div class="text-3xl font-bold my-6 fade-in-up fade-in-delay-2">
+                2x + 3 = 5
+            </div>
+            <div class="text-left w-3/4 mx-auto space-y-4">
+                <div class="bg-gray-800 p-4 rounded-lg fade-in-up fade-in-delay-2">
+                    <p class="slide-text"><span class="bg-sky-500 text-white rounded-full px-3 py-1 mr-3">1</span>
+                        把方程右边的 `5` 减去左边的 `3`，得到 `2`。</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg fade-in-up fade-in-delay-3">
+                    <p class="slide-text"><span class="bg-sky-500 text-white rounded-full px-3 py-1 mr-3">2</span>
+                        用上一步的结果 `2` 除以 `x` 的系数 `2`，得到 `1`。</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg fade-in-up fade-in-delay-4">
+                    <p class="slide-text"><span class="bg-sky-500 text-white rounded-full px-3 py-1 mr-3">3</span>
+                        把计算结果输出，`x` 的值就是 `1`。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Solving the Equation - Python Code -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title text-4xl fade-in-up">用 Python 语言“指挥”计算机</h2>
+            <div class="code-block fade-in-up fade-in-delay-1">
+                <p><span class="code-comment"># 指令1：计算 5 - 3，并将结果存入名为 double_x 的盒子里</span></p>
+                <p><span class="code-variable">double_x</span> = <span class="code-keyword">5</span> - <span
+                        class="code-keyword">3</span></p>
+                <br>
+                <p><span class="code-comment"># 指令2：取出 double_x 盒子里的值，除以 2，再把结果存入名为 x 的盒子里</span></p>
+                <p><span class="code-variable">x</span> = <span class="code-variable">double_x</span> / <span
+                        class="code-keyword">2</span></p>
+                <br>
+                <p><span class="code-comment"># 指令3：把 x 盒子里的最终结果显示出来</span></p>
+                <p><span class="code-function">print</span>(<span class="code-variable">x</span>)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: The Core of Programming -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title fade-in-up">编程的核心</h2>
+            <p
+                class="text-3xl bg-sky-500/10 border border-sky-500 text-sky-300 p-8 rounded-lg leading-relaxed shadow-lg fade-in-up fade-in-delay-1">
+                并非简单地告知计算机“我们想要什么”，<br>而是<span class="highlight text-white">一丝不苟地将“每一步该如何操作”教给它</span>。
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 9: Why do we need computers? -->
+    <div class="slide">
+        <div class="slide-content flex items-center gap-8">
+            <div class="w-1/3 fade-in-up">
+                <svg viewBox="0 0 300 300" class="rounded-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="150" cy="150" r="150" fill="#1f2937" />
+                    <circle cx="150" cy="150" r="120" stroke="#4b5563" stroke-width="15" />
+                    <path d="M150 150 L 250 100" stroke="#38bdf8" stroke-width="10" stroke-linecap="round" />
+                    <circle cx="150" cy="150" r="10" fill="#38bdf8" />
+                    <text x="150" y="220" text-anchor="middle" font-family="'Noto Sans SC', sans-serif" font-size="24"
+                        fill="#9ca3af">MAX</text>
+                    <path d="M56 213 A 120 120 0 0 1 244 213" stroke="#9ca3af" stroke-width="2" fill="none" />
+                </svg>
+            </div>
+            <div class="w-2/3 text-left">
+                <h2 class="slide-title fade-in-up fade-in-delay-1">核心概念二</h2>
+                <p class="text-3xl text-gray-300 fade-in-up fade-in-delay-2">既然计算机这么“傻”，<br>为什么我们还需要它？</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: The Answer: SPEED! -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title text-6xl fade-in-up">快！无与伦比的快！</h2>
+            <p class="slide-subtitle fade-in-up fade-in-delay-1">在执行明确、重复性的任务时，它的速度碾压人类。</p>
+            <div class="flex justify-center items-baseline gap-8 mt-8 text-center fade-in-up fade-in-delay-2">
+                <div>
+                    <p class="text-2xl text-gray-400">人类</p>
+                    <p class="text-5xl font-bold">~10秒</p>
+                    <p class="text-xl mt-2">计算 123 * 456</p>
+                </div>
+                <div class="text-5xl text-gray-600">vs</div>
+                <div>
+                    <p class="text-2xl text-sky-400">计算机</p>
+                    <p class="text-5xl font-bold">>1,000,000,000次/秒</p>
+                    <p class="text-xl mt-2">同类运算</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: How computers are fast -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title text-4xl fade-in-up">计算机如何做到这么快？</h2>
+            <p class="slide-subtitle fade-in-up fade-in-delay-1">因为它内部做的工作被<span class="highlight">简化到了极致</span>。</p>
+            <div class="fade-in-up fade-in-delay-2">
+                <svg viewBox="0 0 800 300" class="rounded-lg mx-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="800" height="300" fill="#1f2937" rx="8" />
+                    <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle"
+                        font-family="'Noto Sans SC', sans-serif" font-size="28" fill="#f9fafb">数十亿个微小的开关(晶体管)</text>
+                    <path d="M400 140 L400 180" stroke="#f9fafb" stroke-width="3" stroke-dasharray="5 5" />
+                    <path d="M395 175 L400 180 L405 175" stroke="#f9fafb" stroke-width="3" fill="none" />
+                    <text x="50%" y="65%" dominant-baseline="middle" text-anchor="middle" font-family="monospace"
+                        font-size="36" fill="#f9fafb">
+                        01011010 → <tspan fill="#38bdf8">1</tspan>0100101
+                    </text>
+                </svg>
+            </div>
+            <p class="slide-text w-3/4 mx-auto mt-6 fade-in-up fade-in-delay-3">
+                所有复杂任务，最终都会被分解成无数个基于“开(1)”和“关(0)”这两个状态的最简单逻辑判断。</p>
+        </div>
+    </div>
+
+    <!-- Slide 12: Why Binary is Fast -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title text-4xl fade-in-up">极致的简单 = 极致的速度</h2>
+            <div class="flex gap-8 mt-8">
+                <div class="w-1/2 bg-gray-800 p-6 rounded-lg fade-in-up fade-in-delay-1">
+                    <h3 class="text-2xl text-sky-400 mb-2">1. 逻辑简单</h3>
+                    <p class="slide-text text-lg">二进制的逻辑运算极其简单（比如“两个开关都打开，结果才算打开”），确保了极高的计算效率和准确性。</p>
+                </div>
+                <div class="w-1/2 bg-gray-800 p-6 rounded-lg fade-in-up fade-in-delay-2">
+                    <h3 class="text-2xl text-sky-400 mb-2">2. 物理实现容易</h3>
+                    <p class="slide-text text-lg">对电路来说，“通电”和“断电”最容易实现和区分，与二进制的“1”和“0”完美契合，使制造高速芯片成为可能。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 13: The Translation Work -->
+    <div class="slide">
+        <div class="slide-content flex items-center gap-8">
+            <div class="w-2/3 text-left">
+                <h2 class="slide-title fade-in-up">核心概念三</h2>
+                <p class="text-3xl text-gray-300 fade-in-up fade-in-delay-1">编程：人与机器之间的<span
+                        class="highlight">“交流”</span></p>
+            </div>
+            <div class="w-1/3 fade-in-up fade-in-delay-2">
+                <svg viewBox="0 0 300 300" class="rounded-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="150" cy="150" r="150" fill="#1f2937" />
+                    <!-- Human Icon -->
+                    <circle cx="100" cy="130" r="25" fill="#9ca3af" />
+                    <path d="M75 160 C 75 180, 125 180, 125 160 Z" fill="#9ca3af" />
+                    <!-- Robot Icon -->
+                    <rect x="170" y="115" width="60" height="40" rx="5" fill="#9ca3af" />
+                    <rect x="170" y="160" width="60" height="20" rx="5" fill="#9ca3af" />
+                    <circle cx="185" cy="135" r="5" fill="#1f2937" />
+                    <circle cx="215" cy="135" r="5" fill="#1f2937" />
+                    <!-- Arrow -->
+                    <path d="M130 140 L 170 140" stroke="#38bdf8" stroke-width="4" />
+                    <path d="M165 135 L 170 140 L 165 145" fill="none" stroke="#38bdf8" stroke-width="4"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M170 160 L 130 160" stroke="#38bdf8" stroke-width="4" />
+                    <path d="M135 155 L 130 160 L 135 165" fill="none" stroke="#38bdf8" stroke-width="4"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 14: The Language Barrier -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title text-4xl fade-in-up">沟通的鸿沟</h2>
+            <div class="flex justify-center items-center gap-16 mt-8">
+                <div class="text-center fade-in-up fade-in-delay-1">
+                    <svg viewBox="0 0 200 200" class="rounded-full mx-auto" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="100" r="100" fill="#111827" />
+                        <circle cx="100" cy="80" r="30" fill="#d1d5db" />
+                        <path d="M60 120 C 60 160, 140 160, 140 120 Z" fill="#d1d5db" />
+                    </svg>
+                    <p class="mt-4 text-xl">习惯使用<br><span class="highlight">自然语言</span> (中文, 英文)</p>
+                    <p class="text-gray-400">(复杂、有歧义)</p>
+                </div>
+                <div class="text-7xl text-gray-600 font-thin fade-in-up fade-in-delay-2">...</div>
+                <div class="text-center fade-in-up fade-in-delay-3">
+                    <svg viewBox="0 0 200 200" class="rounded-full mx-auto" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="100" r="100" fill="#111827" />
+                        <rect x="60" y="70" width="80" height="60" rx="10" fill="#d1d5db" />
+                        <rect x="70" y="80" width="60" height="40" rx="5" fill="#111827" />
+                        <text x="100" y="105" text-anchor="middle" font-family="monospace" font-size="20"
+                            fill="#d1d5db">01</text>
+                    </svg>
+                    <p class="mt-4 text-xl">只懂由0和1组成的<br><span class="highlight">机器指令</span></p>
+                    <p class="text-gray-400">(简单、无歧义)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 15: Programming Languages -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title text-4xl fade-in-up">编程语言应运而生</h2>
+            <p class="slide-subtitle fade-in-up fade-in-delay-1">一种双方各退一步的<span class="highlight">“中间语言”</span></p>
+            <div class="mt-8 flex justify-center items-center gap-12 fade-in-up fade-in-delay-2">
+                <!-- Python Logo -->
+                <img src="images/python-logo.svg" width="80" height="80" alt="Python Logo">
+                <!-- Java Logo -->
+                <img src="images/java-logo.svg" width="80" height="80" alt="Java Logo">
+                <!-- C++ Logo -->
+                <svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100" height="100" rx="15" fill="#00599C" /><text x="50" y="62" font-family="monospace"
+                        font-size="60" fill="white" text-anchor="middle">C++</text>
+                </svg>
+                <!-- JS Logo -->
+                <svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100" height="100" rx="15" fill="#F7DF1E" /><text x="50" y="70" font-family="monospace"
+                        font-weight="bold" font-size="70" fill="black" text-anchor="middle">JS</text>
+                </svg>
+            </div>
+            <p class="slide-text w-3/4 mx-auto mt-8 fade-in-up fade-in-delay-3">
+                编程语言是类自然语言，人可以看懂；<br>其语法简明、语义清晰，翻译成机器指令也不难。</p>
+        </div>
+    </div>
+
+    <!-- 新增 Slide 16: Interpreter and Compiler -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title text-4xl fade-in-up">“翻译官”：解释器与编译器</h2>
+            <p class="slide-subtitle fade-in-up fade-in-delay-1">连接人类思维与机器世界的桥梁</p>
+
+            <div class="translator-diagram fade-in-up fade-in-delay-2">
+                <div class="language-box">
+                    <h3 class="text-xl font-bold mb-2">编程语言</h3>
+                    <p class="text-sm">Python, Java, C++</p>
+                    <p class="text-xs text-gray-400 mt-2">人类可读的代码</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="translator-box">
+                    <h3 class="text-xl mb-2">解释器/编译器</h3>
+                    <p class="text-sm">翻译转换</p>
+                    <p class="text-xs mt-2">将高级语言转换为机器码</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="machine-box">
+                    <h3 class="text-xl font-bold mb-2">机器语言</h3>
+                    <p class="text-sm">01010101</p>
+                    <p class="text-xs text-gray-400 mt-2">计算机可执行的指令</p>
+                </div>
+            </div>
+
+            <div class="compiler-vs-interpreter fade-in-up fade-in-delay-3">
+                <div class="comparison-box">
+                    <h3 class="comparison-title">编译器 (Compiler)</h3>
+                    <p class="slide-text">一次性将整个程序翻译成机器码，生成可执行文件。执行速度快，但修改后需要重新编译。</p>
+                    <p class="text-sm text-gray-400 mt-2">代表语言: C, C++, Go</p>
+                </div>
+                <div class="comparison-box">
+                    <h3 class="comparison-title">解释器 (Interpreter)</h3>
+                    <p class="slide-text">逐行翻译并执行代码，无需生成独立文件。修改后可立即运行，但执行速度相对较慢。</p>
+                    <p class="text-sm text-gray-400 mt-2">代表语言: Python, JavaScript, Ruby</p>
+                </div>
+            </div>
+
+            <p class="slide-text w-3/4 mx-auto mt-8 fade-in-up fade-in-delay-4">
+                无论是编译器还是解释器，它们都是<span class="highlight">编程语言生态系统的核心组件</span>，负责将人类编写的代码转换为计算机能够理解和执行的指令。
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 17: The Translation Process (原Slide 16) -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title text-4xl fade-in-up">从想法到执行的流程</h2>
+            <div class="flowchart fade-in-up fade-in-delay-1">
+                <div class="flow-item">人类意图</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item text-sky-400">编程语言代码</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item">翻译官</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item">机器指令 (0101)</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item">计算机硬件</div>
+            </div>
+            <p class="slide-text w-3/4 mx-auto mt-8 fade-in-up fade-in-delay-2">
+                所以，程序就像人与计算机之间签订的“协议”，它把人类的抽象逻辑翻译成具体的、可执行的步骤。学习编程，就是在学习如何用这种“协议”来指挥计算机。</p>
+        </div>
+    </div>
+
+    <!-- Slide 18: Program, Software, Hardware (原Slide 17) -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title fade-in-up">核心概念四</h2>
+            <p class="text-3xl text-gray-300 fade-in-up fade-in-delay-1">程序、软件与硬件：<span class="highlight">从代码到现实</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 19: Definitions (原Slide 18) -->
+    <div class="slide">
+        <div class="slide-content">
+            <div class="flex text-left gap-6">
+                <div class="w-1/3 bg-gray-800 p-6 rounded-lg fade-in-up fade-in-delay-1">
+                    <h3 class="text-2xl text-sky-400 mb-2">程序 (Program)</h3>
+                    <p class="slide-text text-lg">一组告诉计算机“做什么”和“怎么做”的<span class="highlight">指令集合</span>。如一行打印 `Hello,
+                        World!` 的代码。</p>
+                </div>
+                <div class="w-1/3 bg-gray-800 p-6 rounded-lg fade-in-up fade-in-delay-2">
+                    <h3 class="text-2xl text-sky-400 mb-2">软件 (Software)</h3>
+                    <p class="slide-text text-lg">多个程序组合起来，解决一个复杂现实问题的<span class="highlight">功能合集</span>。如微信、Word。</p>
+                </div>
+                <div class="w-1/3 bg-gray-800 p-6 rounded-lg fade-in-up fade-in-delay-3">
+                    <h3 class="text-2xl text-sky-400 mb-2">硬件 (Hardware)</h3>
+                    <p class="slide-text text-lg">计算机的 CPU、内存、硬盘、显示器等<span class="highlight">物理部件</span>。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 20: The Analogy (原Slide 19) -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title text-4xl fade-in-up">一个生动的类比</h2>
+            <div class="flex justify-around items-center mt-12 text-center">
+                <div class="fade-in-up fade-in-delay-1">
+                    <svg viewBox="0 0 150 150" class="rounded-lg mx-auto" fill="#d1d5db"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <rect width="150" height="150" fill="#1f2937" rx="8" />
+                        <circle cx="75" cy="80" r="20" />
+                        <rect x="90" y="30" width="10" height="70" rx="5" />
+                    </svg>
+                    <p class="mt-4">音符（程序）</p>
+                </div>
+                <div class="fade-in-up fade-in-delay-2 text-5xl text-gray-500">→</div>
+                <div class="fade-in-up fade-in-delay-3">
+                    <svg viewBox="0 0 150 150" class="rounded-lg mx-auto" fill="none" stroke="#d1d5db" stroke-width="4"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <rect width="150" height="150" fill="#1f2937" rx="8" />
+                        <path d="M25 40 H 125" />
+                        <path d="M25 60 H 125" />
+                        <path d="M25 80 H 125" />
+                        <path d="M25 100 H 125" />
+                        <circle cx="50" cy="80" r="8" fill="#d1d5db" stroke="none" />
+                        <circle cx="90" cy="60" r="8" fill="#d1d5db" stroke="none" />
+                    </svg>
+                    <p class="mt-4">乐谱（软件）</p>
+                </div>
+                <div class="fade-in-up fade-in-delay-4 text-5xl text-gray-500">+</div>
+                <div class="fade-in-up fade-in-delay-4">
+                    <svg viewBox="0 0 150 150" class="rounded-lg mx-auto" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <rect width="150" height="150" fill="#1f2937" rx="8" />
+                        <rect x="25" y="60" width="100" height="40" fill="#d1d5db" />
+                        <rect x="30" y="60" width="10" height="40" fill="#374151" />
+                        <rect x="50" y="60" width="10" height="40" fill="#374151" />
+                        <rect x="70" y="60" width="10" height="40" fill="#374151" />
+                        <rect x="90" y="60" width="10" height="40" fill="#374151" />
+                        <rect x="110" y="60" width="10" height="40" fill="#374151" />
+                        <path d="M55 55 L 55 40 L 65 40 L 65 55" stroke="#38bdf8" stroke-width="4" />
+                    </svg>
+                    <p class="mt-4">钢琴（硬件）</p>
+                </div>
+                <div class="fade-in-up fade-in-delay-4 text-5xl text-gray-500">=</div>
+                <div class="fade-in-up fade-in-delay-4">
+                    <svg viewBox="0 0 150 150" class="rounded-lg mx-auto" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <rect width="150" height="150" fill="#1f2937" rx="8" />
+                        <path d="M30 50 Q 75 30 120 50" stroke="#38bdf8" stroke-width="3" fill="none" />
+                        <path d="M30 70 Q 75 50 120 70" stroke="#38bdf8" stroke-width="3" fill="none" />
+                        <path d="M30 90 Q 75 70 120 90" stroke="#38bdf8" stroke-width="3" fill="none" />
+                        <circle cx="50" cy="60" r="5" fill="#38bdf8" />
+                        <circle cx="100" cy="80" r="5" fill="#38bdf8" />
+                    </svg>
+                    <p class="mt-4 text-2xl">华丽乐章</p>
+                </div>
+            </div>
+            <p class="slide-text w-3/4 mx-auto mt-12 fade-in-up fade-in-delay-4">
+                <span>音符组成乐谱，乐谱和钢琴结合才能演奏出华丽的乐章。</span>
+                同样，<span class="highlight">多个程序组成软件，软件在硬件上运行才能发挥真正的价值</span>。
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 21: Summary (原Slide 20) -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title fade-in-up">总结</h2>
+            <p class="text-3xl bg-gray-800 p-8 rounded-lg leading-relaxed shadow-lg fade-in-up fade-in-delay-1">
+                编程就是写给计算机的一份极其详细的<br><span class="highlight">“任务清单”</span>。
+            </p>
+            <p class="slide-text w-3/4 mx-auto mt-8 fade-in-up fade-in-delay-2">
+                学习编程就是学习如何撰写这份“任务清单”的艺术。它考验的不是你的记忆力，而是将复杂问题<span class="highlight">拆解成简单、有序步骤</span>的逻辑思维能力。
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 22: Q&A (原Slide 21) -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="text-8xl font-bold text-white mb-8 fade-in-up">Q & A</h1>
+            <p class="text-3xl text-sky-400 fade-in-up fade-in-delay-1">谢谢大家！</p>
+        </div>
+    </div>
+
+
+    <!-- Navigation -->
+    <div id="slide-counter">1 / 23</div>
+    <button id="prev" class="nav-button">← 上一页</button>
+    <button id="next" class="nav-button">下一页 →</button>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevButton = document.getElementById('prev');
+        const nextButton = document.getElementById('next');
+        const slideCounter = document.getElementById('slide-counter');
+
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+
+        function updateSlides() {
+            slides.forEach((slide, index) => {
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+
+            // Toggle button visibility
+            prevButton.style.display = currentSlide === 0 ? 'none' : 'block';
+            nextButton.style.display = currentSlide === totalSlides - 1 ? 'none' : 'block';
+        }
+
+        nextButton.addEventListener('click', () => {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlides();
+            }
+        });
+
+        prevButton.addEventListener('click', () => {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlides();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateSlides();
+                }
+            } else if (e.key === 'ArrowLeft') {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateSlides();
+                }
+            }
+        });
+
+        // Initial setup
+        updateSlides();
+    </script>
+</body>
+
+</html>
