@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>这么多编程语言，应该怎么选？</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Noto Sans SC", sans-serif;
+        background-color: #0f172a;
+        color: #f9fafb;
+        overflow: hidden;
+      }
+
+      .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+        transform: scale(0.95);
+      }
+
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+      }
+
+      .slide-content {
+        max-width: 1000px;
+        width: 100%;
+        text-align: center;
+      }
+
+      .slide-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #f59e0b;
+        letter-spacing: 1px;
+      }
+
+      .slide-subtitle {
+        font-size: 1.3rem;
+        font-weight: 500;
+        color: #9ca3af;
+        margin-bottom: 2rem;
+      }
+
+      .slide-text {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #d1d5db;
+        text-align: left;
+      }
+
+      .nav-button {
+        position: fixed;
+        bottom: 1.5rem;
+        transform: translateX(-50%);
+        background-color: rgba(31, 41, 55, 0.8);
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 9999px;
+        cursor: pointer;
+        z-index: 10;
+        transition: background-color 0.3s;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.9rem;
+      }
+
+      .nav-button:hover {
+        background-color: #374151;
+      }
+
+      #prev {
+        left: calc(50% - 100px);
+      }
+
+      #next {
+        left: calc(50% + 100px);
+      }
+
+      #slide-counter {
+        position: fixed;
+        bottom: 2.2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #6b7280;
+        font-size: 0.9rem;
+        z-index: 5;
+      }
+
+      /* Animation classes */
+      .fade-in-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+      }
+
+      .fade-in {
+        animation: fadeIn 1s ease-out forwards;
+      }
+
+      .fade-in-delay-1 {
+        animation-delay: 0.2s;
+      }
+
+      .fade-in-delay-2 {
+        animation-delay: 0.4s;
+      }
+
+      .fade-in-delay-3 {
+        animation-delay: 0.6s;
+      }
+
+      .fade-in-delay-4 {
+        animation-delay: 0.8s;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+
+        to {
+          opacity: 1;
+        }
+      }
+
+      .code-block {
+        background-color: #1f2937;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        font-family: "Courier New", Courier, monospace;
+        text-align: left;
+        font-size: 0.9rem;
+        color: #d1d5db;
+        border: 1px solid #374151;
+        margin-top: 1rem;
+      }
+
+      .code-comment {
+        color: #6b7280;
+      }
+
+      .code-keyword {
+        color: #fb923c;
+      }
+
+      .code-variable {
+        color: #60a5fa;
+      }
+
+      .code-function {
+        color: #a78bfa;
+      }
+
+      .highlight {
+        color: #f59e0b;
+        font-weight: bold;
+      }
+
+      .slide-title-smaller {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #f59e0b;
+        letter-spacing: 1px;
+      }
+
+      .slide-title-weaker {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #9ca3af;
+        letter-spacing: 1px;
+      }
+
+      .timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .timeline-item {
+        display: flex;
+        align-items: center;
+        background: #1f2937;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #f59e0b;
+        transition: transform 0.2s ease;
+      }
+
+      .timeline-item:hover {
+        transform: translateX(10px);
+      }
+
+      .timeline-year {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #f59e0b;
+        min-width: 80px;
+        margin-right: 1rem;
+      }
+
+      .timeline-content {
+        flex: 1;
+      }
+
+      .timeline-title {
+        font-weight: bold;
+        color: #e2e8f0;
+        margin-bottom: 0.25rem;
+      }
+
+      .timeline-desc {
+        color: #9ca3af;
+        font-size: 0.9rem;
+      }
+
+      .comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+      }
+
+      .comparison-card {
+        background: #1f2937;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid #374151;
+        transition: transform 0.2s ease;
+      }
+
+      .comparison-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #f59e0b;
+      }
+
+      .text-highlights {
+        background: rgba(245, 158, 11, 0.1);
+        border-left: 4px solid #f59e0b;
+        padding: 1rem;
+        margin: 1rem auto;
+        border-radius: 0 0.5rem 0.5rem 0;
+        width: 80%;
+        max-width: 800px;
+      }
+
+      .language-evolution {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .lang-box {
+        background: linear-gradient(135deg, #1f2937, #374151);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        text-align: center;
+        min-width: 120px;
+        border: 1px solid #4b5563;
+        transition: transform 0.2s ease;
+      }
+
+      .lang-box:hover {
+        transform: scale(1.05);
+      }
+
+      .lang-name {
+        font-weight: bold;
+        color: #f59e0b;
+        margin-bottom: 0.5rem;
+      }
+
+      .lang-year {
+        color: #9ca3af;
+        font-size: 0.8rem;
+      }
+
+      .arrow-right {
+        font-size: 1.5rem;
+        color: #9ca3af;
+      }
+
+      .pros-cons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-top: 1.5rem;
+      }
+
+      .pros, .cons {
+        background: #1f2937;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid #374151;
+      }
+
+      .pros {
+        border-left: 4px solid #10b981;
+      }
+
+      .cons {
+        border-left: 4px solid #ef4444;
+      }
+
+      .pros h3 {
+        color: #10b981;
+        font-weight: bold;
+        margin-bottom: 1rem;
+      }
+
+      .cons h3 {
+        color: #ef4444;
+        font-weight: bold;
+        margin-bottom: 1rem;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .feature-item {
+        background: #1f2937;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #374151;
+        text-align: center;
+      }
+
+      .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .python-icon { color: #3776ab; }
+      .java-icon { color: #f89820; }
+      .js-icon { color: #f7df1e; }
+      .cpp-icon { color: #00599c; }
+
+      .recommendation-box {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        padding: 2rem;
+        border-radius: 1rem;
+        margin: 2rem auto;
+        max-width: 600px;
+        text-align: center;
+        color: white;
+        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+      }
+
+      .recommendation-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+      }
+
+      /* 3:4 aspect ratio container for vertical orientation (suitable for Xiaohongshu) */
+      .aspect-3-4 {
+        aspect-ratio: 3 / 4;
+        width: 100%;
+        max-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      }
+
+      /* Xiaohongshu cover specific styles */
+      .xhs-cover {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        text-align: center;
+      }
+
+      .xhs-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(to right, #f59e0b, #fbbf24);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        line-height: 1.3;
+      }
+
+      .xhs-subtitle {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #e2e8f0;
+        margin-bottom: 2rem;
+        line-height: 1.4;
+      }
+
+      .xhs-decorative-line {
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(to right, #f59e0b, #fbbf24);
+        border-radius: 2px;
+        margin: 0 auto 2rem;
+      }
+
+      .xhs-bottom-text {
+        position: absolute;
+        bottom: 2rem;
+        font-size: 1.1rem;
+        color: #94a3b8;
+        font-weight: 500;
+      }
+
+      .xhs-icon {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .xhs-lang-icons {
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+        right: 2rem;
+        bottom: 2rem;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .xhs-lang-icon {
+        position: absolute;
+        opacity: 0.15;
+        animation: float 6s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+        100% { transform: translateY(0px); }
+      }
+
+      .lang-icon-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.4;
+      }
+
+      .cover-icons {
+        top: 2rem;
+        left: 2rem;
+        right: 2rem;
+        bottom: 2rem;
+      }
+
+      .lang-icon {
+        position: absolute;
+        opacity: 0.15;
+        animation: float 6s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+        100% { transform: translateY(0px); }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Slide 0: Xiaohongshu Cover -->
+    <div class="slide active">
+      <div class="aspect-3-4">
+        <div class="xhs-cover">
+          <div class="lang-icon-container cover-icons">
+            <img src="images/python-logo.svg" class="lang-icon" style="width: 70px; top: 25%; left: 20%; animation-delay: 0s;">
+            <img src="images/java-logo.svg" class="lang-icon" style="width: 110px; top: 28%; right: 15%; animation-delay: -2s;">
+            <div class="lang-icon" style="width: 50px; bottom: 25%; left: 30%; animation-delay: -4s;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <rect width="100" height="100" rx="15" fill="#F7DF1E"/>
+                <text x="50" y="55" font-family="Arial, sans-serif" font-size="50" fill="#000000" text-anchor="middle" dominant-baseline="middle" font-weight="bold">JS</text>
+              </svg>
+            </div>
+            <div class="lang-icon" style="width: 50px; bottom: 35%; right: 25%; animation-delay: -1s;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <rect width="100" height="100" rx="15" fill="#00599C"/>
+                <text x="50" y="52" font-family="Arial, sans-serif" font-size="40" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle" font-weight="bold">C++</text>
+              </svg>
+            </div>
+            <div class="lang-icon" style="width: 50px; top: 45%; left: 20%; animation-delay: -3s;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <rect width="100" height="100" rx="15" fill="#A8B9CC"/>
+                <text x="50" y="55" font-family="Arial, sans-serif" font-size="60" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle" font-weight="bold">C</text>
+              </svg>
+            </div>
+          </div>
+          <div class="xhs-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+          </div>
+          <h1 class="xhs-title" style="z-index: 1;">
+            这么多编程语言<br />到底应该怎么选？
+          </h1>
+          <div class="xhs-decorative-line" style="z-index: 1;"></div>
+          <h2 class="xhs-subtitle" style="z-index: 1;">
+            入门 | 趋势 | 就业<br />一次讲清！
+          </h2>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Slide 1: Title -->
+    <div class="slide">
+      <div class="slide-content text-center" style="position: relative;">
+        <div class="lang-icon-container">
+          <img src="images/python-logo.svg" class="lang-icon" style="width: 100px; top: -125%; left: 20%; animation-delay: 0s;">
+          <img src="images/java-logo.svg" class="lang-icon" style="width: 150px; top: -105%; right: 50px; animation-delay: -2s;">
+          <div class="lang-icon" style="width: 80px; bottom: -65%; left: 100px; animation-delay: -4s;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+              <rect width="100" height="100" rx="15" fill="#F7DF1E"/>
+              <text x="50" y="55" font-family="Arial, sans-serif" font-size="50" fill="#000000" text-anchor="middle" dominant-baseline="middle" font-weight="bold">JS</text>
+            </svg>
+          </div>
+          <div class="lang-icon" style="width: 80px; bottom: -125%; right: 200px; animation-delay: -1s;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+              <rect width="100" height="100" rx="15" fill="#00599C"/>
+              <text x="50" y="52" font-family="Arial, sans-serif" font-size="40" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle" font-weight="bold">C++</text>
+            </svg>
+          </div>
+          <div class="lang-icon" style="width: 80px; top: 40%; left: -15%; animation-delay: -3s;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+              <rect width="100" height="100" rx="15" fill="#A8B9CC"/>
+              <text x="50" y="55" font-family="Arial, sans-serif" font-size="60" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle" font-weight="bold">C</text>
+            </svg>
+          </div>
+        </div>
+        <div class="mt-12 fade-in-up fade-in-delay-2">
+          <div class="language-evolution">
+            <div class="lang-box">
+              <div class="lang-name">机器语言</div>
+              <div class="lang-year">1940s</div>
+            </div>
+            <div class="arrow-right">→</div>
+            <div class="lang-box">
+              <div class="lang-name">汇编</div>
+              <div class="lang-year">1950s</div>
+            </div>
+            <div class="arrow-right">→</div>
+            <div class="lang-box">
+              <div class="lang-name">C</div>
+              <div class="lang-year">1972</div>
+            </div>
+            <div class="arrow-right">→</div>
+            <div class="lang-box">
+              <div class="lang-name">Java</div>
+              <div class="lang-year">1995</div>
+            </div>
+            <div class="arrow-right">→</div>
+            <div class="lang-box">
+              <div class="lang-name">Python</div>
+              <div class="lang-year">1991</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2: Car Analogy -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title fade-in-up">编程语言就像汽车</h2>
+        <p class="slide-text mt-6 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          假如今天就要去买辆汽车，你会怎么选？是奢华的劳斯莱斯，还是经济实用的轩逸？是配置拉满的国产新能源，还是注重驾驶体验的特斯拉？
+        </p>
+        
+        <div class="comparison-grid fade-in-up fade-in-delay-2">
+          <div class="comparison-card">
+            <div class="card-title">🚗 不同需求</div>
+            <ul class="slide-text list-disc list-inside space-y-2">
+              <li>家庭出行 vs 商务接待</li>
+              <li>城市代步 vs 长途旅行</li>
+              <li>经济实用 vs 豪华体验</li>
+            </ul>
+          </div>
+          
+          <div class="comparison-card">
+            <div class="card-title">💻 编程语言也一样</div>
+            <ul class="slide-text list-disc list-inside space-y-2">
+              <li>网站开发 vs 系统编程</li>
+              <li>快速原型 vs 高性能计算</li>
+              <li>易学易用 vs 精确控制</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="text-highlights mt-6 fade-in-up fade-in-delay-3">
+          <p class="slide-text">
+            显然答案因人而异，不同人有不同需求和预算，<span class="highlight">没有最好的，只有最适合自己的</span>。编程语言也一样——它们各有侧重，适合的场景取决于硬件资源、要解决的问题类型等。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Evolution Overview -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title fade-in-up">编程语言的进化主线</h2>
+        <p class="slide-subtitle fade-in-up fade-in-delay-1">从"机器友好"到"人类友好"</p>
+        
+        <div class="timeline fade-in-up fade-in-delay-2">
+          <div class="timeline-item">
+            <div class="timeline-year">早期</div>
+            <div class="timeline-content">
+              <div class="timeline-title">榨干硬件性能</div>
+              <div class="timeline-desc">计算机资源极其宝贵，唯一目标就是最大化利用硬件</div>
+            </div>
+          </div>
+          
+          <div class="timeline-item">
+            <div class="timeline-year">摩尔定律</div>
+            <div class="timeline-content">
+              <div class="timeline-title">游戏规则改变</div>
+              <div class="timeline-desc">硬件性能飞速提升，价格持续走低，程序员数量爆炸式增长</div>
+            </div>
+          </div>
+          
+          <div class="timeline-item">
+            <div class="timeline-year">现代</div>
+            <div class="timeline-content">
+              <div class="timeline-title">开发效率优先</div>
+              <div class="timeline-desc">最大成本不再是机器运行时间，而是程序员的开发时间</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-highlights mt-6 fade-in-up fade-in-delay-3">
+          <p class="slide-text">
+            理解了这条<span class="highlight">"人性化"</span>的进化主线，就能洞悉一门编程语言能够迅速流行、并长期保持生命力的核心秘密。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4: Machine Language -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-smaller fade-in-up">机器语言：计算机的母语</h2>
+        
+        <p class="slide-text mt-6 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          计算机的世界里只有 0 和 1。这种能被计算机硬件直接执行的、纯粹由 0 和 1 组成的指令，就是<span class="highlight">机器语言</span>。
+        </p>
+
+        <div class="code-block w-3/5 mx-auto mt-6 fade-in-up fade-in-delay-2">
+          <div class="text-center mb-2 text-amber-400">计算 5 + 3 的机器语言指令</div>
+          <pre>
+10110000 00000101
+00000100 00000011
+10111000 00111100 00000000 00000000
+00110001 11111111
+00001111 00000101
+          </pre>
+        </div>
+
+        <div class="pros-cons fade-in-up fade-in-delay-3">
+          <div class="pros">
+            <h3>✅ 优势</h3>
+            <ul class="slide-text list-disc list-inside space-y-1">
+              <li>执行效率最高</li>
+              <li>直接控制硬件</li>
+              <li>无需翻译过程</li>
+            </ul>
+          </div>
+          
+          <div class="cons">
+            <h3>❌ 劣势</h3>
+            <ul class="slide-text list-disc list-inside space-y-1">
+              <li>极难理解和编写</li>
+              <li>依赖特定硬件架构</li>
+              <li>无法跨平台运行</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 5: Assembly Language -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-smaller fade-in-up">汇编语言：第一次"翻译革命"</h2>
+        <p class="slide-text mt-4 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          汇编语言引入了<span class="highlight">人类可读的助记符</span>，用简短的英文单词代替晦涩的二进制指令，是迈向“可读性编程”的第一步。
+        </p>
+        <div class="flex gap-4 mt-4">
+          <div class="w-1/2 code-block fade-in-up fade-in-delay-2">
+            <div class="text-center mb-2 text-amber-400">计算 5 + 3</div>
+            <pre>
+mov al, 5       ; 把数值 5 放入 AL 寄存器
+add al, 3       ; AL = AL + 3 → 8
+syscall         ; 执行系统调用 (简化版)
+            </pre>
+          </div>
+          <div class="w-1/2 fade-in-up fade-in-delay-3">
+            <div class="pros-cons" style="grid-template-columns: 1fr; margin-top: 0; gap: 1rem;">
+              <div class="pros" style="padding: 1rem;">
+                <h3>✅ 优点</h3>
+                <ul class="slide-text list-disc list-inside space-y-1 text-sm">
+                  <li>可读性大幅提升</li>
+                  <li>保留对硬件的精细控制</li>
+                </ul>
+              </div>
+              <div class="cons" style="padding: 1rem;">
+                <h3>❌ 缺点</h3>
+                <ul class="slide-text list-disc list-inside space-y-1 text-sm">
+                  <li>移植性差，依赖特定CPU</li>
+                  <li>开发门槛高，需懂硬件</li>
+                  <li>已成为特定领域的专用工具</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="text-highlights mt-4 fade-in-up fade-in-delay-4">
+          <p class="slide-text">
+            这次飞跃的意义在于：人机交互的范式，自此从<span class="highlight">"人适应机器"</span>转向了<span class="highlight">"机器语言开始适应人"</span>。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 6: High-level Languages -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-smaller fade-in-up">高级语言：让代码"说人话"</h2>
+        
+        <p class="slide-text mt-6 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          1972年诞生的 <span class="highlight">C 语言</span> 是真正的里程碑。凭借其高效、灵活且接近底层的特性，C 语言迅速成为全球主流的编程语言。
+        </p>
+
+        <div class="code-block w-3/5 mx-auto mt-6 fade-in-up fade-in-delay-2">
+          <div class="text-center mb-2 text-amber-400">C 语言计算 5 + 3</div>
+          <pre>
+#include &lt;stdio.h&gt;
+
+int main() {
+    int a = 5;        // 定义变量 a 并赋值为 5
+    int b = 3;        // 定义变量 b 并赋值为 3
+    int sum = a + b;  // 计算 a 和 b 的和
+    
+    return 0;         // 返回 0，表示程序正常结束
+}
+          </pre>
+        </div>
+
+        <div class="feature-grid fade-in-up fade-in-delay-3">
+          <div class="feature-item">
+            <div class="feature-icon">🎯</div>
+            <div class="font-bold text-amber-400">高度抽象</div>
+            <div class="text-sm mt-2">屏蔽底层硬件复杂细节</div>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-icon">🌐</div>
+            <div class="font-bold text-amber-400">跨平台</div>
+            <div class="text-sm mt-2">标准化代码可在不同系统运行</div>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-icon">📖</div>
+            <div class="font-bold text-amber-400">可读性强</div>
+            <div class="text-sm mt-2">接近自然语言的表达方式</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 7: Procedural Programming Dilemma -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-smaller fade-in-up">指令式编程的困境</h2>
+        <p class="slide-text mt-4 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          程序导向如同编写一份事无巨细的操作手册，通过一行行的指令按部就班地告诉计算机该做什么。这在处理小型任务时很高效，但当软件规模变大时，代码很快就会变成一团乱麻。
+        </p>
+        <div class="code-block w-4/5 mx-auto mt-4 fade-in-up fade-in-delay-2" style="font-size: 0.8rem; max-height: 40vh; overflow-y: auto;">
+          <div class="text-center mb-2 text-amber-400">用指令操作冰箱</div>
+          <pre>
+// 用一个结构体来描述冰箱的所有部件状态
+struct RefrigeratorParts {
+    bool compressor_on;
+    bool fan_on;
+    bool light_on;
+    int temperature;
+};
+
+// 需要一系列独立的函数来操作这些部件
+void open_door(RefrigeratorParts& fridge) { /* ... */ }
+void close_door(RefrigeratorParts& fridge) { /* ... */ }
+void check_temperature_and_run(RefrigeratorParts& fridge) { /* ... */ }
+
+int main() {
+    // 1. 实例化一个冰箱的“零件集合”
+    RefrigeratorParts my_fridge = {false, false, false, 25};
+    // 2. 按照“操作手册”一步步执行
+    open_door(my_fridge);
+    std::cout << "动作: 将饮料放入冰箱。" << std::endl;
+    close_door(my_fridge);
+    // 3. 用户必须“记得”检查温度并启动制冷
+    check_temperature_and_run(my_fridge);
+}
+          </pre>
+        </div>
+        <div class="text-highlights mt-4 fade-in-up fade-in-delay-3">
+          <p class="slide-text">
+            问题显而易见：作为使用者，我们必须记住所有正确的操作顺序，并且直接接触到了冰箱的内部零件。一旦流程复杂，代码将变得<span class="highlight">极难维护</span>。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 8: Object-Oriented Thinking -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-smaller fade-in-up">面向对象：更符合直觉的思维</h2>
+        <p class="slide-text mt-4 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          <span class="highlight">面向对象编程 (OOP)</span> 让编程回归人类的直觉，像与现实世界互动一样去构建软件。它将事物相关的属性和功能组织在一起，成为一个“对象”。
+        </p>
+        <div class="code-block w-4/5 mx-auto mt-4 fade-in-up fade-in-delay-2" style="font-size: 0.8rem; max-height: 40vh; overflow-y: auto;">
+          <div class="text-center mb-2 text-amber-400">冰箱“对象”</div>
+          <pre>
+class Refrigerator {
+// private部分是“隐藏”的内部细节
+private:
+    bool compressor_on;
+    int temperature;
+    // 内部的复杂逻辑，自动处理
+    void check_temperature_and_run() { /* ... */ }
+
+// public部分是暴露给用户的“操作接口”
+public:
+    void putInItem(const std::string& item) {
+        openDoor();
+        // ...
+        closeDoor(); // 关门后自动检查是否需要制冷
+    }
+};
+
+int main() {
+    // 1. 从“冰箱”类创建一个具体的冰箱对象
+    Refrigerator myFridge;
+    // 2. 直接调用“想做的事”对应的方法，简单直观
+    myFridge.putInItem("苏打水");
+}
+          </pre>
+        </div>
+        <div class="text-highlights mt-4 fade-in-up fade-in-delay-3">
+          <p class="slide-text">
+            这个“隐藏对象内部实现细节，只暴露必要操作接口”的原则，就是面向对象的第一个核心特性——<span class="highlight">封装 (Encapsulation)</span>。它让我们的代码变得像现实世界的物件一样，清晰、健壮、易于使用。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 9: C++ Introduction -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-smaller fade-in-up">C++：将面向对象带入主流</h2>
+        <p class="slide-text mt-6 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          真正将面向对象思想推向全球工业界并使其发扬光大的，是1985年问世的 <span class="highlight">C++</span>。
+        </p>
+        <div class="comparison-grid fade-in-up fade-in-delay-2">
+          <div class="comparison-card">
+            <div class="card-title">与 C 的关系</div>
+            <ul class="slide-text list-disc list-inside space-y-2">
+              <li>在 C 语言基础上扩展而来</li>
+              <li>核心贡献是引入完整的 OOP 范式</li>
+              <li>为保持兼容，同时支持两种风格</li>
+            </ul>
+          </div>
+          <div class="comparison-card">
+            <div class="card-title">继承的“代价”</div>
+            <ul class="slide-text list-disc list-inside space-y-2">
+              <li>继承了 C 语言的复杂性</li>
+              <li>手动内存管理和指针误用，依然是导致程序出错的重灾区</li>
+            </ul>
+          </div>
+        </div>
+        <div class="code-block w-2/5 mx-auto mt-6 fade-in-up fade-in-delay-3">
+          <div class="text-center mb-2 text-amber-400">C++ 计算 5 + 3</div>
+          <pre>
+#include &lt;iostream&gt;
+int main() {
+    int a = 5;
+    int b = 3;
+    int sum = a + b;
+    return 0;
+}
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 10: Modern Languages -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-smaller fade-in-up">现代编程语言：从手动挡到自动挡</h2>
+        <p class="slide-text mt-4 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          C/C++ 虽强大，但内存管理和指针操作就像<span class="highlight">“手动挡”</span>，要求开发者时刻保持警惕。业界渴望一辆<span class="highlight">“自动挡”</span>汽车，而 Java 应运而生，旨在让编程更简单、更安全。
+        </p>
+        <div class="flex gap-6 mt-4 items-stretch">
+          <!-- Left Column: Features -->
+          <div class="w-1/2 flex flex-col fade-in-up fade-in-delay-2">
+            <div class="feature-item flex-1">
+              <div class="feature-icon">🗑️</div>
+              <div class="font-bold text-amber-400">自动垃圾回收</div>
+              <div class="text-sm mt-2">无需手动管理内存</div>
+            </div>
+            <div class="feature-item flex-1 mt-4">
+              <div class="feature-icon">🚫</div>
+              <div class="font-bold text-amber-400">没有指针</div>
+              <div class="text-sm mt-2">避免指针相关错误</div>
+            </div>
+          </div>
+          <!-- Right Column: Execution Principle -->
+          <div class="w-1/2 flex flex-col fade-in-up fade-in-delay-3">
+            <div class="comparison-card flex-1 flex flex-col justify-center">
+              <div class="card-title">Java 如何跨平台？</div>
+              <img src="https://cdn.nlark.com/yuque/0/2024/png/87727/1725114531021-a75dd645-b52c-4683-801f-0ef1da8f0077.png" alt="Java Execution" class="rounded-lg mx-auto my-2" style="max-height: 150px;">
+              <p class="slide-text text-sm">
+                源码被编译成一种中间<span class="highlight">字节码</span>，然后在各平台安装的 <span class="highlight">JVM (Java虚拟机)</span> 内解释或编译成机器码执行，实现“一次编写，到处运行”。
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 11: Script Languages -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-smaller fade-in-up">脚本语言：随取随用的"瑞士军刀"</h2>
+        <p class="slide-text mt-6 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          与 Java 同期还诞生了一类语言，它们语法简单、通常无需预先编译即可执行，非常适合编写短小、快速执行的程序。
+        </p>
+        <div class="comparison-grid fade-in-up fade-in-delay-2">
+          <div class="comparison-card">
+            <div class="card-title php-icon">🌐 PHP</div>
+            <p class="slide-text">主要用于网页程序开发，一度风靡世界。</p>
+          </div>
+          <div class="comparison-card">
+            <div class="card-title js-icon">⚡ JavaScript</div>
+            <p class="slide-text">唯一可在浏览器中运行的语言，是网页开发的必备技能。</p>
+          </div>
+          <div class="comparison-card">
+            <div class="card-title python-icon">🐍 Python</div>
+            <p class="slide-text">语法极简，拥有海量科学计算库，在人工智能领域广受欢迎。</p>
+          </div>
+        </div>
+        <div class="text-highlights mt-6 fade-in-up fade-in-delay-3">
+          <p class="slide-text">
+            这些语言通常被称为<span class="highlight">“解释型”</span>或<span class="highlight">“脚本”</span>语言，但它们的内部工作原理可能比听起来更复杂。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 12: Python's Execution Model -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-smaller fade-in-up">Python 的运行原理</h2>
+        <p class="slide-text mt-4 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          虽然常被称为“解释型语言”，但 Python 采用的是一种<span class="highlight">“先编译，后解释”</span>的混合模式，这与 Java 相似但又有所不同。
+        </p>
+        <div class="flex gap-6 mt-4 items-center">
+          <!-- Left Column: Diagram -->
+          <div class="w-1/2 flex flex-col fade-in-up fade-in-delay-2">
+            <img src="https://cdn.nlark.com/yuque/0/2025/png/87727/1757819677849-a18dad1d-90cc-48eb-86a6-05329ff80294.png" alt="Python Execution" class="rounded-lg mx-auto">
+          </div>
+          <!-- Right Column: Code & Explanation -->
+          <div class="w-1/2 flex flex-col fade-in-up fade-in-delay-3">
+            <div class="code-block">
+              <div class="text-center mb-2 text-amber-400">Python 计算 5 + 3</div>
+              <pre>
+a = 5
+b = 3
+sum_result = a + b
+              </pre>
+            </div>
+            <p class="slide-text text-sm mt-2">
+              执行 <span class="highlight">`python3 ./sum.py`</span> 时，解释器首先将源码<span class="highlight">隐式编译</span>成字节码，然后由 Python 虚拟机 (PVM) 逐条解释执行。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 13: Why Choose Python -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title fade-in-up">初学者应该如何做选择？</h2>
+        
+        <p class="slide-text mt-6 w-4/5 mx-auto fade-in-up fade-in-delay-1">
+          如果目标是：<span class="highlight">作为完全的初学者，想要轻松踏入编程世界的大门，并在这个过程中持续获得成就感</span>，那么这门入门语言必须具备两个关键特质：
+        </p>
+
+        <div class="feature-grid fade-in-up fade-in-delay-2">
+          <div class="feature-item">
+            <div class="feature-icon">🎯</div>
+            <div class="font-bold text-amber-400">足够简单</div>
+            <div class="text-sm mt-2">语法规则少，逻辑直观，专注于"编程思维"</div>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-icon">⚡</div>
+            <div class="font-bold text-amber-400">即时反馈</div>
+            <div class="text-sm mt-2">能方便地做出有趣、可视化的结果</div>
+          </div>
+        </div>
+
+        <div class="recommendation-box fade-in-up fade-in-delay-3">
+          <div class="recommendation-title">🏆 推荐答案</div>
+          <div class="text-2xl font-bold">Python</div>
+          <div class="mt-2">不仅为初学者铺了最平缓的学习路径，本身也是一门功能极其强大的语言</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 14: Python Advantages -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-smaller fade-in-up">为什么选择 Python？</h2>
+        
+        <div class="comparison-grid fade-in-up fade-in-delay-1">
+          <div class="comparison-card">
+            <div class="card-title">📝 语法极简，快速上手</div>
+            <p class="slide-text mb-3">Python 的设计哲学是"优雅、明确、简单"</p>
+            <div class="code-block">
+              <pre>print("你好，世界！")</pre>
+            </div>
+            <p class="slide-text text-sm mt-2">只需一行代码就能打印"Hello World"</p>
+          </div>
+          
+          <div class="comparison-card">
+            <div class="card-title">🎮 即时反馈，乐趣驱动</div>
+            <ul class="slide-text list-disc list-inside space-y-1">
+              <li><span class="highlight">turtle</span> 库：绘制精美图形</li>
+              <li><span class="highlight">pygame</span> 库：制作小游戏</li>
+              <li><span class="highlight">requests</span> 库：获取网页内容</li>
+            </ul>
+          </div>
+          
+          <div class="comparison-card">
+            <div class="card-title">🚀 应用广泛，未来可期</div>
+            <ul class="slide-text list-disc list-inside space-y-1">
+              <li><span class="highlight">AI</span>：TensorFlow, PyTorch</li>
+              <li><span class="highlight">数据科学</span>：Pandas, NumPy</li>
+              <li><span class="highlight">网站开发</span>：Django, Flask</li>
+              <li><span class="highlight">自动化脚本</span>：提高工作效率</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="text-highlights mt-6 fade-in-up fade-in-delay-2">
+          <p class="slide-text">
+            Python 拥有<span class="highlight">"低门槛，高上限"</span>的黄金特性。它不仅是入门的首选，更是许多前沿领域的王者。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 15: Why Universities Use C -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title-smaller fade-in-up">为什么很多学校第一门编程课用 C 语言？</h2>
+        
+        <div class="comparison-grid fade-in-up fade-in-delay-1">
+          <div class="comparison-card">
+            <div class="card-title">🐍 Python 的目标</div>
+            <div class="slide-text">
+              <div class="font-bold text-green-400 mb-2">快速应用，培养兴趣</div>
+              <ul class="list-disc list-inside space-y-1">
+                <li>尽快体验编程乐趣</li>
+                <li>用高层次抽象工具</li>
+                <li>解决实际问题</li>
+                <li>保持学习动力</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="comparison-card">
+            <div class="card-title">⚙️ C 语言的目标</div>
+            <div class="slide-text">
+              <div class="font-bold text-blue-400 mb-2">深入原理，夯实内功</div>
+              <ul class="list-disc list-inside space-y-1">
+                <li>理解计算机底层运作</li>
+                <li>手动管理内存</li>
+                <li>培养系统级开发能力</li>
+                <li>打下坚实基础</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-highlights mt-6 fade-in-up fade-in-delay-2">
+          <p class="slide-text">
+            选择 C 语言入门，是一种<span class="highlight">"自底向上"</span>的硬核教学法。它走的不是最轻松的路，但能确保学生打下最坚实的底层知识基础。
+          </p>
+        </div>
+
+        <p class="slide-text mt-4 w-4/5 mx-auto text-center fade-in-up fade-in-delay-3">
+          然而，这种教学法往往<span class="highlight">高估了初学者的学习兴趣，却低估了入门难度</span>。近年来越来越多学校开始采用 Python 作为入门语言。
+        </p>
+      </div>
+    </div>
+
+    <!-- Slide 16: Evolution Summary -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title fade-in-up">编程语言进化的本质</h2>
+
+        <div class="recommendation-box mt-6 fade-in-up fade-in-delay-3">
+          <div class="recommendation-title">🎯 核心使命</div>
+          <div>让人类更高效、更安全地驾驭机器</div>
+        </div>
+        
+        <div class="timeline fade-in-up fade-in-delay-1">
+          <div class="timeline-item">
+            <div class="timeline-year">过去</div>
+            <div class="timeline-content">
+              <div class="timeline-title">专家工具</div>
+              <div class="timeline-desc">需要扳手调试的机器码，只有顶尖科学家能驾驭</div>
+            </div>
+          </div>
+          
+          <div class="timeline-item">
+            <div class="timeline-year">现在</div>
+            <div class="timeline-content">
+              <div class="timeline-title">大众语言</div>
+              <div class="timeline-desc">小学生都能上手的图形化编程，人人都能创造</div>
+            </div>
+          </div>
+          
+          <div class="timeline-item">
+            <div class="timeline-year">未来</div>
+            <div class="timeline-content">
+              <div class="timeline-title">自然交互</div>
+              <div class="timeline-desc">编程将进一步"隐形"，融入自然语言与AI协作</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-highlights mt-8 fade-in-up fade-in-delay-2">
+          <p class="slide-text text-center">
+            编程语言的演化史，本质上是<span class="highlight">"从专家工具到大众语言"</span>的民主化过程。人类不断降低编程的门槛，让创造力不再被技术细节束缚。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 17: 就业选择建议 -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title fade-in-up">就业方向选择</h2>
+        
+        <div class="comparison-grid mt-4 fade-in-up fade-in-delay-1" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: stretch;">
+          
+          <div class="comparison-card flex flex-col">
+            <div class="card-title">C</div>
+            <ul class="slide-text list-disc list-inside space-y-2 text-left flex-grow">
+              <li><strong class="text-amber-300">主要领域：</strong>嵌入式开发、操作系统、驱动程序、底层库开发、IoT 设备。</li>
+              <li><strong class="text-amber-300">就业特点：</strong>岗位量没有互联网开发那么多，但在硬件、车载、芯片、工业控制等行业刚需很稳定。</li>
+              <li><strong class="text-amber-300">适合人群：</strong>喜欢底层、对硬件和系统有兴趣的人。</li>
+            </ul>
+          </div>
+          
+          <div class="comparison-card flex flex-col">
+            <div class="card-title">C++</div>
+            <ul class="slide-text list-disc list-inside space-y-2 text-left flex-grow">
+              <li><strong class="text-amber-300">主要领域：</strong>游戏开发、图形引擎、客户端/桌面应用、大型系统（如高性能服务器、数据库内核）、金融高频交易。</li>
+              <li><strong class="text-amber-300">就业特点：</strong>门槛高、要求扎实的计算机基础，但一旦进入，对技术的积累有长期价值。</li>
+              <li><strong class="text-amber-300">适合人群：</strong>对性能敏感的场景有兴趣，喜欢挑战复杂系统的人。</li>
+            </ul>
+          </div>
+          
+          <div class="comparison-card flex flex-col">
+            <div class="card-title">Java</div>
+            <ul class="slide-text list-disc list-inside space-y-2 text-left flex-grow">
+              <li><strong class="text-amber-300">主要领域：</strong>互联网后台开发、企业级应用、金融、电商、政府信息化系统。</li>
+              <li><strong class="text-amber-300">就业特点：</strong>岗位数量最多，就业面最广；多数大厂核心后端仍在用 Java，但部分开始用 Go 替代</li>
+              <li><strong class="text-amber-300">适合人群：</strong>想走互联网、企业后台路线，追求就业稳定性的人。</li>
+            </ul>
+          </div>
+          
+          <div class="comparison-card flex flex-col">
+            <div class="card-title">Python</div>
+            <ul class="slide-text list-disc list-inside space-y-2 text-left flex-grow">
+              <li><strong class="text-amber-300">主要领域：</strong>数据分析、人工智能、机器学习、爬虫、自动化运维、脚本工具。</li>
+              <li><strong class="text-amber-300">就业特点：</strong>AI 热点带动，科研/初创公司用得多；在传统互联网岗位上没有 Java 多，但在新兴方向有优势。</li>
+              <li><strong class="text-amber-300">适合人群：</strong>对数据、算法、AI 应用感兴趣的人。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 18: Final Recommendation -->
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title fade-in-up">最终建议</h2>
+        
+        <div class="recommendation-box fade-in-up fade-in-delay-1">
+          <div class="recommendation-title">🚀 开始你的编程之旅</div>
+          <div class="text-xl mb-4">从 Python 开始，是最明智的选择</div>
+        </div>
+
+        <div class="comparison-grid mt-6 fade-in-up fade-in-delay-2">
+          <div class="comparison-card">
+            <div class="card-title">🎯 学习路径建议</div>
+            <ol class="slide-text list-decimal list-inside space-y-1">
+              <li>从 Python 开始建立编程思维</li>
+              <li>掌握基本的算法和数据结构</li>
+              <li>根据兴趣选择专业方向</li>
+              <li>学习相关的其他语言和工具</li>
+            </ol>
+          </div>
+          
+          <div class="comparison-card">
+            <div class="card-title">💡 记住这一点</div>
+            <p class="slide-text">
+              编程语言只是工具，<span class="highlight">编程思维</span>才是核心。一旦掌握了编程思维，学习任何新语言都会变得容易。
+            </p>
+          </div>
+        </div>
+
+        <p class="slide-text mt-6 text-center text-2xl fade-in-up fade-in-delay-3">
+          🌟 开始编程，从今天开始！
+        </p>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div id="slide-counter">1 / 19</div>
+    <button id="prev" class="nav-button">← 上一页</button>
+    <button id="next" class="nav-button">下一页 →</button>
+
+    <script>
+      const slides = document.querySelectorAll(".slide");
+      const prevButton = document.getElementById("prev");
+      const nextButton = document.getElementById("next");
+      const slideCounter = document.getElementById("slide-counter");
+
+      // Get slide number from URL parameter or default to 0
+      function getCurrentSlideFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const slideParam = urlParams.get("slide");
+        return slideParam ? parseInt(slideParam) - 1 : 0;
+      }
+
+      // Update URL with current slide number
+      function updateURL(slideIndex) {
+        const url = new URL(window.location);
+        url.searchParams.set("slide", slideIndex + 1);
+        window.history.replaceState({}, "", url);
+      }
+
+      let currentSlide = Math.max(
+        0,
+        Math.min(getCurrentSlideFromURL(), slides.length - 1)
+      );
+      const totalSlides = slides.length;
+
+      function updateSlides() {
+        slides.forEach((slide, index) => {
+          if (index === currentSlide) {
+            slide.classList.add("active");
+          } else {
+            slide.classList.remove("active");
+          }
+        });
+        slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+
+        // Toggle button visibility
+        prevButton.style.display = currentSlide === 0 ? "none" : "block";
+        nextButton.style.display =
+          currentSlide === totalSlides - 1 ? "none" : "block";
+
+        // Update URL to reflect current slide
+        updateURL(currentSlide);
+      }
+
+      nextButton.addEventListener("click", () => {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateSlides();
+        }
+      });
+
+      prevButton.addEventListener("click", () => {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateSlides();
+        }
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          if (currentSlide < totalSlides - 1) {
+            currentSlide++;
+            updateSlides();
+          }
+        } else if (e.key === "ArrowLeft") {
+          if (currentSlide > 0) {
+            currentSlide--;
+            updateSlides();
+          }
+        }
+      });
+
+      // Handle browser back/forward buttons
+      window.addEventListener("popstate", () => {
+        currentSlide = Math.max(
+          0,
+          Math.min(getCurrentSlideFromURL(), slides.length - 1)
+        );
+        updateSlides();
+      });
+
+      // Initialize
+      updateSlides();
+    </script>
+  </body>
+</html>
