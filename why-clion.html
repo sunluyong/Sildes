@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>为什么选择 CLion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Noto Sans SC", sans-serif;
+        background-color: #111827;
+        color: #f9fafb;
+        overflow: hidden;
+      }
+
+      .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+        transform: scale(0.95);
+      }
+
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+      }
+
+      .slide-content {
+        max-width: 1000px;
+        width: 100%;
+        text-align: center;
+      }
+
+      .slide-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #34d399; /* Changed from blue to green */
+        letter-spacing: 1px;
+      }
+
+      .slide-subtitle {
+        font-size: 1.3rem;
+        font-weight: 500;
+        color: #9ca3af;
+        margin-bottom: 2rem;
+      }
+
+      .slide-text {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #d1d5db;
+        text-align: left;
+      }
+
+      .nav-button {
+        position: fixed;
+        bottom: 1.5rem;
+        transform: translateX(-50%);
+        background-color: rgba(31, 41, 55, 0.8);
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 9999px;
+        cursor: pointer;
+        z-index: 10;
+        transition: background-color 0.3s;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.9rem;
+      }
+
+      .nav-button:hover {
+        background-color: #374151;
+      }
+
+      #prev {
+        left: calc(50% - 100px);
+      }
+
+      #next {
+        left: calc(50% + 100px);
+      }
+
+      #slide-counter {
+        position: fixed;
+        bottom: 2.2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #6b7280;
+        font-size: 0.9rem;
+        z-index: 5;
+      }
+
+      /* Animation classes */
+      .fade-in-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+      }
+
+      .fade-in {
+        animation: fadeIn 1s ease-out forwards;
+      }
+      
+      .fade-in-delay-1 { animation-delay: 0.2s; }
+      .fade-in-delay-2 { animation-delay: 0.4s; }
+      .fade-in-delay-3 { animation-delay: 0.6s; }
+      .fade-in-delay-4 { animation-delay: 0.8s; }
+
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      table {
+        width: 100%;
+        margin-top: 1.5rem;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+      }
+
+      th, td {
+        border: 1px solid #4b5563;
+        padding: 0.8rem;
+        text-align: left;
+      }
+
+      th {
+        background-color: #374151;
+        font-weight: 600;
+      }
+      
+      .highlight {
+        color: #34d399; /* Changed from blue to green */
+        font-weight: bold;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.9);
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content {
+        max-width: 90%;
+        max-height: 90%;
+      }
+
+      .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Slides will be inserted here -->
+    <div class="slide active">
+      <div class="slide-content">
+        <h1 class="slide-title">为什么选择 CLion 学习 C/C++</h1>
+        <p class="slide-subtitle">免去环境配置的烦恼，专注于 C/C++ 开发</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title">C/C++ 环境配置的挑战</h2>
+        <p class="slide-subtitle">编译器、调试器、构建系统... 新手入门的第一大难题</p>
+        <table class="w-4/5 mx-auto">
+          <thead>
+            <tr>
+              <th>环节</th>
+              <th>需要了解的概念</th>
+              <th>常见问题</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>编译器</td>
+              <td>GCC, Clang, MSVC...</td>
+              <td>环境变量配置错误，版本不兼容</td>
+            </tr>
+            <tr>
+              <td>构建系统</td>
+              <td>Makefile, CMake, Ninja...</td>
+              <td>语法复杂，链接错误 (undefined reference)</td>
+            </tr>
+            <tr>
+              <td>调试器</td>
+              <td>GDB, LLDB...</td>
+              <td>命令行操作不直观，学习成本高</td>
+            </tr>
+             <tr>
+              <td>编辑器/IDE</td>
+              <td>VSCode, Vim, Sublime Text...</td>
+              <td>需要手动安装插件并配置，体验不统一</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title">1. 极大地简化了环境搭建与项目管理</h2>
+        <div class="flex gap-8 items-center mt-8">
+            <div class="w-1/2">
+                <img src="./images/clion-tool.png" alt="Placeholder Image" class="rounded-lg">
+            </div>
+            <div class="w-1/2 slide-text text-left">
+                <ul class="list-disc list-inside space-y-4">
+                    <li><strong class="highlight">一站式解决方案：</strong> 集成代码编辑器、编译器、调试器和 CMake 项目管理工具，无需在命令行间切换。</li>
+                    <li><strong class="highlight">内置 CMake 支持：</strong> 自动生成和维护 CMakeLists.txt，图形化添加源文件，避免常见的链接错误。</li>
+                    <li><strong class="highlight">智能工具链管理：</strong> 自动检测 Windows, macOS, Linux 下的编译器和调试器，引导完成配置。</li>
+                </ul>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title">2. 强大的编码辅助功能</h2>
+            <p class="slide-subtitle">提升效率与代码质量，像一位资深程序员在旁边指导</p>
+            <div class="flex gap-8 items-center">
+                <div class="w-1/2 slide-text">
+                    <strong>顶级的智能代码补全：</strong>
+                    <ul class="list-disc list-inside mt-2 space-y-2">
+                        <li>根据上下文精确提示变量、函数、类成员。</li>
+                        <li>加快编码速度，帮助探索和学习库的 API。</li>
+                    </ul>
+                    <strong class="mt-4 inline-block">一键重构 (Refactoring)：</strong>
+                    <ul class="list-disc list-inside mt-2 space-y-2">
+                        <li>安全、准确地在整个项目中重命名变量、函数或类。</li>
+                    </ul>
+                </div>
+                <div class="w-1/2">
+                    <img src="./images/smart_completion.webp" alt="Placeholder Image" class="rounded-lg">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title">2. 强大的编码辅助功能</h2>
+             <div class="flex gap-8 items-center mt-8">
+                <div class="w-1/2">
+                     <img src="./images/code-analysis.webp" alt="Placeholder Image" class="rounded-lg">
+                </div>
+                <div class="w-1/2 slide-text">
+                    <strong>实时的代码分析与错误提示：</strong>
+                    <ul class="list-disc list-inside mt-2 space-y-2">
+                        <li>实时分析代码，即时用波浪线标出语法和逻辑错误。</li>
+                        <li>在编译前就修正大量低级错误，建立良好编码习惯。</li>
+                    </ul>
+                    <strong class="mt-4 inline-block">清晰的代码导航：</strong>
+                    <ul class="list-disc list-inside mt-2 space-y-2">
+                        <li>轻松在函数定义、声明和调用之间跳转。</li>
+                        <li>快速查找类或函数在何处被使用，理解项目结构。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title">3. 直观且强大的图形化调试器</h2>
+            <p class="slide-subtitle">调试是编程学习的核心，但 GDB 等命令行工具对新手极不友好</p>
+            <div class="flex gap-8 items-center mt-4">
+                <div class="w-1/2 slide-text">
+                    <ul class="list-disc list-inside space-y-4">
+                        <li><strong class="highlight">可视化调试：</strong> 轻松设置断点，单步执行代码，观察程序执行流程。</li>
+                        <li><strong class="highlight">实时变量监视：</strong> 清晰看到当前作用域所有变量的值，复杂数据会以树状结构直观展示。</li>
+                        <li><strong class="highlight">入门零成本：</strong> 无需学习 GDB 命令，专注于通过调试来理解代码逻辑和发现问题。</li>
+                    </ul>
+                </div>
+                <div class="w-1/2">
+                    <img src="./images/set_execution_point.webp" alt="Placeholder Image" class="rounded-lg">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title">4. 辅助学习与代码理解</h2>
+            <p class="slide-subtitle">CLion 不仅仅是个工具，更是一个学习伴侣</p>
+             <div class="flex gap-8 items-center mt-4">
+                <div class="w-1/2">
+                    <img src="./images//quick_doc_eval.webp" alt="Placeholder Image" class="rounded-lg">
+                </div>
+                <div class="w-1/2 slide-text">
+                    <ul class="list-disc list-inside space-y-4">
+                        <li><strong class="highlight">参数信息提示：</strong> 调用函数时，IDE 会提示每个参数的名称，让函数功能一目了然。</li>
+                        <li><strong class="highlight">快速文档查询：</strong> 鼠标悬停或按快捷键即可查看函数文档和用法说明，无需频繁查阅资料。</li>
+                        <li><strong class="highlight">代码模板与生成：</strong> 快速生成类的构造函数、析构函数、Getter/Setter 等样板代码。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title">5. 免费使用</h2>
+        <p class="slide-subtitle">适用于个人非商业开发</p>
+        <ul class="slide-text list-disc list-inside w-3/4 mx-auto space-y-2 mt-4 text-left">
+          <li>
+            <strong class="highlight">学习和自我教育:</strong> 个人学习 C/C++ 或用于教学目的。
+          </li>
+          <li>
+            <strong class="highlight">开源贡献:</strong> 为不获取商业利益的开源项目做贡献。
+          </li>
+          <li>
+            <strong class="highlight">内容创作:</strong> 用于任何形式的内容创作，如撰写技术博客、录制教程视频等。
+          </li>
+           <li>
+            <strong class="highlight">爱好开发:</strong> 开发个人项目或用于业余爱好。
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content">
+        <h2 class="slide-title">核心优势总结</h2>
+        <ul class="slide-text list-disc list-inside w-3/4 mx-auto space-y-4 text-left">
+          <li>
+            <strong class="highlight">一站式环境:</strong> 无需复杂的环境配置，专注于 C/C++ 学习。
+          </li>
+          <li>
+            <strong class="highlight">智能编码辅助:</strong> 强大的代码补全、实时错误检查和重构功能，加速开发并培养良好编码习惯。
+          </li>
+          <li>
+            <strong class="highlight">可视化调试:</strong> 直观的调试工具，轻松定位问题，深入理解代码执行流程，学习成本极低。
+          </li>
+          <li>
+            <strong class="highlight">无缝集成:</strong> 内置 CMake 构建系统和版本控制工具 (Git)，提供流畅的开发体验。
+          </li>
+           <li>
+            <strong class="highlight">辅助学习:</strong> 通过参数提示、快速文档和代码生成等功能，成为强大的学习伴侣。
+          </li>
+          <li>
+            <strong class="highlight">免费使用:</strong> 非商业目的个人使用完全免费，功能和付费版一致。
+          </li>
+        </ul>
+        <p class="slide-text w-3/4 mx-auto mt-8">
+          对于初学者，CLion 是快速上手 C/C++ 并迈向专业开发的最佳选择。
+        </p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content" style="max-width: 1200px;">
+        <h2 class="slide-title">不只是 C/C++，JetBrains IDE 生态</h2>
+        <p class="slide-subtitle">JetBrains 为 Java、Python、Go、前端等几乎所有主流编程语言都提供了强大的 IDE</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
+            <div class="bg-gray-800 p-6 rounded-lg text-center border border-green-500 hover:bg-green-900/20 transition">
+                <h3 class="text-2xl font-bold text-white mb-2">CLion</h3>
+                <p class="text-gray-400">C, C++</p>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg text-center border border-purple-500 hover:bg-purple-900/20 transition">
+                <h3 class="text-2xl font-bold text-white mb-2">IntelliJ IDEA</h3>
+                <p class="text-gray-400">Java, Kotlin, Spring</p>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg text-center border border-blue-500 hover:bg-blue-900/20 transition">
+                <h3 class="text-2xl font-bold text-white mb-2">PyCharm</h3>
+                <p class="text-gray-400">Python, Django</p>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg text-center border border-cyan-500 hover:bg-cyan-900/20 transition">
+                <h3 class="text-2xl font-bold text-white mb-2">WebStorm</h3>
+                <p class="text-gray-400">JavaScript, TypeScript, React</p>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg text-center border border-teal-500 hover:bg-teal-900/20 transition">
+                <h3 class="text-2xl font-bold text-white mb-2">GoLand</h3>
+                <p class="text-gray-400">Go (Golang)</p>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg text-center border border-indigo-500 hover:bg-indigo-900/20 transition">
+                <h3 class="text-2xl font-bold text-white mb-2">PhpStorm</h3>
+                <p class="text-gray-400">PHP, Laravel, Symfony</p>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg text-center border border-yellow-500 hover:bg-yellow-900/20 transition">
+                <h3 class="text-2xl font-bold text-white mb-2">Rider</h3>
+                <p class="text-gray-400">.NET, C#</p>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg text-center border border-orange-500 hover:bg-orange-900/20 transition">
+                <h3 class="text-2xl font-bold text-white mb-2">DataGrip</h3>
+                <p class="text-gray-400">SQL, Databases</p>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div id="slide-counter"></div>
+    <button id="prev" class="nav-button">← 上一页</button>
+    <button id="next" class="nav-button">下一页 →</button>
+
+    <div id="imageModal" class="modal">
+      <span class="modal-close">&times;</span>
+      <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+      const slides = document.querySelectorAll(".slide");
+      const prevButton = document.getElementById("prev");
+      const nextButton = document.getElementById("next");
+      const slideCounter = document.getElementById("slide-counter");
+
+      function getCurrentSlideFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const slideParam = urlParams.get("slide");
+        return slideParam ? parseInt(slideParam) - 1 : 0;
+      }
+
+      function updateURL(slideIndex) {
+        const url = new URL(window.location);
+        url.searchParams.set("slide", slideIndex + 1);
+        window.history.replaceState({}, "", url);
+      }
+
+      let currentSlide = Math.max(0, Math.min(getCurrentSlideFromURL(), slides.length - 1));
+      const totalSlides = slides.length;
+
+      function updateSlides() {
+        if (totalSlides === 0) return;
+        slides.forEach((slide, index) => {
+          if (index === currentSlide) {
+            slide.classList.add("active");
+          } else {
+            slide.classList.remove("active");
+          }
+        });
+        slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+        prevButton.style.display = currentSlide === 0 ? "none" : "block";
+        nextButton.style.display = currentSlide === totalSlides - 1 ? "none" : "block";
+        updateURL(currentSlide);
+      }
+
+      nextButton.addEventListener("click", () => {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateSlides();
+        }
+      });
+
+      prevButton.addEventListener("click", () => {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateSlides();
+        }
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          if (currentSlide < totalSlides - 1) {
+            currentSlide++;
+            updateSlides();
+          }
+        } else if (e.key === "ArrowLeft") {
+          if (currentSlide > 0) {
+            currentSlide--;
+            updateSlides();
+          }
+        }
+      });
+
+      window.addEventListener("popstate", () => {
+        currentSlide = Math.max(0, Math.min(getCurrentSlideFromURL(), slides.length - 1));
+        updateSlides();
+      });
+
+      // Image Modal
+      const modal = document.getElementById("imageModal");
+      const modalImg = document.getElementById("modalImage");
+      const closeBtn = document.querySelector("#imageModal .modal-close");
+
+      document.querySelectorAll(".slide img").forEach(img => {
+        img.style.cursor = "pointer";
+        img.addEventListener("click", function() {
+          modal.style.display = "flex";
+          modalImg.src = this.src;
+        });
+      });
+
+      function closeModal() {
+        modal.style.display = "none";
+      }
+
+      closeBtn.addEventListener("click", closeModal);
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+          closeModal();
+        }
+      });
+
+      // Initialize
+      updateSlides();
+    </script>
+  </body>
+</html>

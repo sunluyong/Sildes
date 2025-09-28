@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPU 与内存的关系</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            flex-direction: column;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 40px;
+        }
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+        }
+        .memory-container, .cpu-container {
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .memory-container h2, .cpu-container h2 {
+            text-align: center;
+            margin-top: 0;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .memory {
+            display: flex;
+            flex-direction: column; /* 修改为 column */
+            width: 250px;
+        }
+        .mem-segment {
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            text-align: center;
+            background-color: #f9f9f9;
+            font-size: 14px;
+            position: relative;
+        }
+        .free-space {
+            border: none;
+            background-color: #fff;
+        }
+        .mem-segment-content {
+            font-size: 12px;
+            color: #e91e63;
+            font-family: 'Courier New', Courier, monospace;
+            margin-top: 4px;
+            font-weight: bold;
+        }
+        .mem-segment:last-child {
+            margin-bottom: 0;
+        }
+        .stack { background-color: #ffecb3; }
+        .heap { background-color: #dcedc8; }
+        .bss { background-color: #c5cae9; }
+        .data { background-color: #b3e5fc; }
+        .code { background-color: #ffcdd2; }
+        .arrows {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .cpu {
+            width: 200px;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .cpu-box {
+            border: 2px dashed #999;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+            width: 80%;
+        }
+        .instruction, .data-bus {
+             font-weight: bold;
+        }
+
+        .flow {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ff5722;
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 5px #ff5722, 0 0 10px #ff5722;
+        }
+        .code-example {
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+        .code-example h2 {
+            text-align: center;
+            margin-top: 0;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .code-example pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            line-height: 1.5;
+        }
+        .code-example .comment {
+            color: #75715e;
+        }
+        .code-example .keyword {
+            color: #66d9ef;
+        }
+        .code-example .string {
+            color: #e6db74;
+        }
+        .code-example .variable {
+            color: #a6e22e;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 2px solid #333;
+            background-color: #fff;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .page-controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .controls button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 2px solid #333;
+            background-color: #fff;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .controls button:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .controls button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* Styles for Slide 2: Memory Visualization */
+        .memory-animation-container {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+
+        .memory-cells-container {
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .memory-cells-container h2 {
+            text-align: center;
+            margin-top: 0;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .memory-cells {
+            display: flex;
+            flex-wrap: wrap;
+            width: 424px;
+        }
+
+        .memory-cell {
+            width: 50px;
+            height: 60px;
+            border: 1px solid #999;
+            margin: 1px;
+            position: relative;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f9f9f9;
+        }
+
+        .memory-cell .address {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .memory-cell .value {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 40%;
+            left: 0;
+            transform: translateY(-50%);
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 10;
+        }
+        
+        .memory-cell .var-name {
+            position: absolute;
+            bottom: 2px;
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            z-index: 10;
+        }
+
+
+        .memory-cell.int { background-color: #b3e5fc; }
+        .memory-cell.char { background-color: #dcedc8; }
+        .memory-cell.pointer { background-color: #ffecb3; }
+        .memory-cell.struct-member-1 { background-color: #d1c4e9; }
+        .memory-cell.struct-member-2 { background-color: #b39ddb; }
+        .memory-cell.padding { background-color: #c5cae9; }
+
+        .code-example .line {
+            transition: background-color 0.3s;
+            padding: 0 5px;
+            border-radius: 0;
+        }
+
+        .code-example .line.highlight {
+            background-color: #444;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="slide active" id="slide1">
+        <h1>CPU 与内存的工作流程</h1>
+        <div class="main-container">
+    
+            <div class="container">
+                <div class="cpu-container">
+                    <h2>CPU</h2>
+                    <div class="cpu">
+                        <div class="cpu-box">
+                            指令: <span id="instruction" class="instruction"></span>
+                        </div>
+                        <div class="cpu-box">
+                            数据: <span id="data-bus" class="data-bus"></span>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="memory-container">
+                    <h2>内存 (Memory)</h2>
+                    <div class="memory">
+                        <div class="mem-segment stack">
+                            <span class="arrows">↓ ...</span> 栈 (Stack)
+                            <div class="mem-segment-content">int local_val = 5;</div>
+                        </div>
+                        <div class="mem-segment free-space">空闲区域</div>
+                        <div class="mem-segment heap">
+                             堆 (Heap) <span class="arrows">↑ ...</span>
+                             <div class="mem-segment-content">malloc(), new</div>
+                        </div>
+                        <div class="mem-segment bss">
+                            BSS 区 (.bss)
+                            <div class="mem-segment-content">static int g_uninit_val;</div>
+                        </div>
+                        <div class="mem-segment data">
+                            数据区 (.data)
+                            <div class="mem-segment-content">int g_val = 10;</div>
+                        </div>
+                        <div class="mem-segment code">
+                            代码区 (.text)
+                            <div class="mem-segment-content">main(), printf()</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="code-example">
+                <h2>代码示例</h2>
+                <pre><code id="code-lines-1"><div class="line"><span class="comment">// 全局初始化变量 -&gt; .data section</span></div><div class="line" data-step="1"><span class="keyword">int</span> <span class="variable">g_val</span> = 10;</div><div class="line"><span class="comment">// 全局未初始化变量 -&gt; .bss section</span></div><div class="line"><span class="keyword">static int</span> <span class="variable">g_uninit_val</span>;</div><div class="line"><span class="keyword">int</span> <span class="variable">main</span>() {</div><div class="line">    <span class="comment">// 局部变量 -&gt; stack</span></div><div class="line" data-step="2">    <span class="keyword">int</span> <span class="variable">local_val</span> = 5;</div><div class="line">    <span class="comment">// g_val 的值写入 local_val -&gt; stack</span></div><div class="line" data-step="0">    <span class="variable">local_val</span> = <span class="variable">g_val</span>;</div><div class="line">    <span class="comment">// 动态分配 -&gt; heap</span></div><div class="line">    <span class="keyword">char*</span> <span class="variable">str</span> = (<span class="keyword">char*</span>)malloc(10);</div><div class="line">    <span class="comment">// "hello" 是字符串常量，也在 .data 或 .text 中</span></div><div class="line">    strcpy(str, <span class="string">"hello"</span>);</div><div class="line">    free(str);</div><div class="line">    <span class="keyword">return</span> 0;</div><div class="line">}</div></code></pre>
+            </div>
+        </div>
+    
+        <div class="controls">
+            <button id="next-step" class="btn">下一步</button>
+            <button id="reset-animation" class="btn">重置</button>
+        </div>
+    </div>
+
+    <div class="slide" id="slide2">
+        <h1>深入理解内存</h1>
+        <div class="memory-animation-container">
+            <div class="code-example">
+                <h2>C 源代码</h2>
+                <pre><code id="code-lines"><div class="line"><span class="keyword">int</span> main() {</div><div class="line" data-step="0">    <span class="keyword">int</span> <span class="variable">num</span> = 10;</div><div class="line" data-step="1">    <span class="keyword">char</span> <span class="variable">letter</span> = 'A';</div><div class="line" data-step="2">    <span class="keyword">int*</span> <span class="variable">p</span> = &num;</div><div class="line">    <span class="keyword">return</span> 0;</div><div class="line">}</div></code></pre>
+                <div class="controls">
+                    <button id="next-step-mem" class="btn">下一步</button>
+                    <button id="reset-mem" class="btn">重置</button>
+                </div>
+            </div>
+            <div class="memory-cells-container">
+                <h2>内存布局</h2>
+                <div id="memory-cells" class="memory-cells"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide3">
+        <h1>结构体与指针</h1>
+        <div class="memory-animation-container">
+            <div class="code-example">
+                <h2>C 源代码</h2>
+                <pre><code id="code-lines-3"><div class="line"><span class="keyword">struct</span> Point {</div><div class="line">    <span class="keyword">int</span> x;</div><div class="line">    <span class="keyword">char</span> y;</div><div class="line">};</div><div class="line"> </div><div class="line"><span class="keyword">int</span> main() {</div><div class="line" data-step="0">    <span class="keyword">struct</span> Point p1 = {10, 'A'};</div><div class="line" data-step="1">    <span class="keyword">struct</span> Point* ptr = &p1;</div><div class="line">    <span class="keyword">return</span> 0;</div><div class="line">}</div></code></pre>
+                <div class="controls">
+                    <button id="next-step-mem3" class="btn">下一步</button>
+                    <button id="reset-mem3" class="btn">重置</button>
+                </div>
+            </div>
+            <div class="memory-cells-container">
+                <h2>内存布局</h2>
+                <div id="memory-cells-3" class="memory-cells"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-controls">
+        <button id="prev-page" class="btn">上一页</button>
+        <button id="next-page" class="btn">下一页</button>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slide1 = document.getElementById('slide1');
+
+            const codeSegment = slide1.querySelector('.code');
+            const dataSegment = slide1.querySelector('.data');
+            const stackSegment = slide1.querySelector('.stack');
+            const stackContent = stackSegment.querySelector('.mem-segment-content');
+            const instructionSpan = document.getElementById('instruction');
+            const dataBusSpan = document.getElementById('data-bus');
+            const instructionBox = instructionSpan.parentElement;
+            const dataBox = dataBusSpan.parentElement;
+
+            const nextStepBtn = document.getElementById('next-step');
+            const resetBtn = document.getElementById('reset-animation');
+
+            const slide1CodeLines = slide1.querySelectorAll('#code-lines-1 .line');
+
+            let currentStep = 0;
+            const totalSteps = 3;
+
+            const instruction = 'MOV local_val, g_val';
+            const dataValue = '10';
+
+            function createFlowParticle(startX, startY) {
+                const particle = document.createElement('div');
+                particle.className = 'flow';
+                document.body.appendChild(particle);
+                particle.style.left = startX + 'px';
+                particle.style.top = startY + 'px';
+                return particle;
+            }
+
+            function animateFlow(startEl, endEl, onComplete) {
+                const startRect = startEl.getBoundingClientRect();
+                const endRect = endEl.getBoundingClientRect();
+
+                const startX = startRect.left + startRect.width / 2;
+                const startY = startRect.top + startRect.height / 2;
+                const endX = endRect.left + endRect.width / 2;
+                const endY = endRect.top + endRect.height / 2;
+
+                const particleCount = 5;
+                const trailDelay = 80;
+
+                nextStepBtn.disabled = true;
+
+                for (let i = 0; i < particleCount; i++) {
+                    setTimeout(() => {
+                        const particle = createFlowParticle(startX, startY);
+
+                        particle.animate([
+                            { transform: 'translate(0, 0)', opacity: 1 },
+                            { transform: `translate(${endX - startX}px, ${endY - startY}px)`, opacity: 1 },
+                            { transform: `translate(${endX - startX}px, ${endY - startY}px)`, opacity: 0 }
+                        ], {
+                            duration: 2000, 
+                            easing: 'ease-in-out'
+                        }).onfinish = () => {
+                            particle.remove();
+                            if (i === particleCount - 1) {
+                                if (onComplete) onComplete();
+                                if (currentStep < totalSteps) {
+                                    nextStepBtn.disabled = false;
+                                }
+                            }
+                        };
+                    }, i * trailDelay);
+                }
+            }
+
+            function resetState() {
+                currentStep = 0;
+                instructionSpan.textContent = '';
+                dataBusSpan.textContent = '';
+                stackContent.textContent = 'int local_val = 5;';
+                nextStepBtn.disabled = false;
+                highlightCodeLine1(-1);
+                
+                const tempElements = stackSegment.querySelectorAll('.temp-write');
+                tempElements.forEach(el => el.remove());
+            }
+
+            function highlightCodeLine1(step) {
+                slide1CodeLines.forEach(line => line.classList.remove('highlight'));
+                if (step >= 0) {
+                    const targetLine = slide1.querySelector(`#code-lines-1 .line[data-step="${step}"]`);
+                    if (targetLine) {
+                        targetLine.classList.add('highlight');
+                    }
+                }
+            }
+
+            function executeStep() {
+                switch (currentStep) {
+                    case 0: // 1. CPU 从代码区读取指令
+                        highlightCodeLine1(0);
+                        animateFlow(codeSegment, instructionBox, () => {
+                            instructionSpan.textContent = instruction;
+                        });
+                        break;
+                    case 1: // 2. CPU 从数据区读取数据
+                        highlightCodeLine1(1);
+                        animateFlow(dataSegment, dataBox, () => {
+                            dataBusSpan.textContent = dataValue;
+                        });
+                        break;
+                    case 2: // 3. CPU 将数据写回栈
+                        highlightCodeLine1(2);
+                        animateFlow(dataBox, stackSegment, () => {
+                            dataBusSpan.textContent = '';
+                            stackContent.textContent = `int local_val = ${dataValue};`;
+                            const newData = document.createElement('div');
+                            newData.className = 'temp-write';
+                            newData.textContent = `写入数据: ${dataValue}`;
+                            newData.style.fontSize = '12px';
+                            newData.style.color = '#d32f2f';
+                            stackSegment.appendChild(newData);
+                        });
+                        break;
+                }
+                currentStep++;
+                 if (currentStep >= totalSteps) {
+                    nextStepBtn.disabled = true;
+                }
+            }
+            
+            nextStepBtn.addEventListener('click', executeStep);
+            resetBtn.addEventListener('click', resetState);
+
+            resetState(); // Initialize
+
+
+            // --- Slide 2 Logic ---
+            const slide2 = document.getElementById('slide2');
+            if (slide2) {
+                const memCellsContainer = slide2.querySelector('#memory-cells');
+                const nextBtnMem = slide2.querySelector('#next-step-mem');
+                const resetBtnMem = slide2.querySelector('#reset-mem');
+                const codeLines = slide2.querySelectorAll('#code-lines .line');
+                const totalCells = 24;
+                const baseAddress = 0x1000;
+                let memCurrentStep = 0;
+                const totalMemSteps = slide2.querySelectorAll('#code-lines .line[data-step]').length;
+
+                function initMemoryCells() {
+                    memCellsContainer.innerHTML = '';
+                    for (let i = 0; i < totalCells; i++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'memory-cell';
+                        cell.dataset.address = baseAddress + i;
+
+                        const addressDiv = document.createElement('div');
+                        addressDiv.className = 'address';
+                        addressDiv.textContent = `0x${(baseAddress + i).toString(16)}`;
+                        cell.appendChild(addressDiv);
+                        
+                        memCellsContainer.appendChild(cell);
+                    }
+                }
+
+                function highlightCodeLine(step) {
+                    codeLines.forEach((line) => {
+                        line.classList.remove('highlight');
+                    });
+                    if (step >= 0) {
+                        const targetLine = slide2.querySelector(`.line[data-step="${step}"]`);
+                        if (targetLine) {
+                            targetLine.classList.add('highlight');
+                        }
+                    }
+                }
+
+                function resetMemoryAnimation() {
+                    memCurrentStep = 0;
+                    initMemoryCells();
+                    highlightCodeLine(-1);
+                    nextBtnMem.disabled = false;
+                }
+
+                function executeMemoryStep() {
+                    if (memCurrentStep >= totalMemSteps) return;
+
+                    highlightCodeLine(memCurrentStep);
+                    switch (memCurrentStep) {
+                        case 0: // int num = 10;
+                            allocateVariable(2, 4, 'int', 'num', 10, memCellsContainer);
+                            break;
+                        case 1: // char letter = 'A';
+                            allocateVariable(6, 1, 'char', 'letter', "'A'", memCellsContainer);
+                            break;
+                        case 2: // int* p = &num;
+                            allocateVariable(7, 8, 'pointer', 'p', `0x${(baseAddress + 2).toString(16)}`, memCellsContainer);
+                            break;
+                    }
+                    memCurrentStep++;
+                    if (memCurrentStep >= totalMemSteps) {
+                       nextBtnMem.disabled = true;
+                    }
+                }
+
+                nextBtnMem.addEventListener('click', executeMemoryStep);
+                resetBtnMem.addEventListener('click', resetMemoryAnimation);
+                
+                resetMemoryAnimation();
+            }
+
+
+            // --- Slide 3 Logic ---
+            const slide3 = document.getElementById('slide3');
+            if (slide3) {
+                const memCellsContainer3 = slide3.querySelector('#memory-cells-3');
+                const nextBtnMem3 = slide3.querySelector('#next-step-mem3');
+                const resetBtnMem3 = slide3.querySelector('#reset-mem3');
+                const codeLines3 = slide3.querySelectorAll('#code-lines-3 .line');
+                const totalCells3 = 24;
+                const baseAddress3 = 0x1000;
+                let memCurrentStep3 = 0;
+                const totalMemSteps3 = slide3.querySelectorAll('#code-lines-3 .line[data-step]').length;
+
+                function initMemoryCells3() {
+                    memCellsContainer3.innerHTML = '';
+                    for (let i = 0; i < totalCells3; i++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'memory-cell';
+                        cell.dataset.address = baseAddress3 + i;
+
+                        const addressDiv = document.createElement('div');
+                        addressDiv.className = 'address';
+                        addressDiv.textContent = `0x${(baseAddress3 + i).toString(16)}`;
+                        cell.appendChild(addressDiv);
+                        
+                        memCellsContainer3.appendChild(cell);
+                    }
+                }
+
+                function highlightCodeLine3(step) {
+                    codeLines3.forEach((line) => {
+                        line.classList.remove('highlight');
+                    });
+                    if (step >= 0) {
+                        const targetLine = slide3.querySelector(`.line[data-step="${step}"]`);
+                        if (targetLine) {
+                            targetLine.classList.add('highlight');
+                        }
+                    }
+                }
+
+                function resetMemoryAnimation3() {
+                    memCurrentStep3 = 0;
+                    initMemoryCells3();
+                    highlightCodeLine3(-1);
+                    nextBtnMem3.disabled = false;
+                }
+
+                function executeMemoryStep3() {
+                    if (memCurrentStep3 >= totalMemSteps3) return;
+
+                    highlightCodeLine3(memCurrentStep3);
+                    switch (memCurrentStep3) {
+                        case 0: // struct Point p1 = {10, 'A'};
+                            // Allocate p1.x
+                            allocateVariable(0, 4, 'struct-member-1', 'p1.x', 10, memCellsContainer3);
+                            // Allocate p1.y
+                            allocateVariable(4, 1, 'struct-member-2', 'p1.y', "'A'", memCellsContainer3);
+                            // Allocate padding
+                            allocateVariable(5, 3, 'padding', '(padding)', '', memCellsContainer3);
+                            break;
+                        case 1: // struct Point* ptr = &p1;
+                            allocateVariable(8, 8, 'pointer', 'ptr', `0x${(baseAddress3 + 0).toString(16)}`, memCellsContainer3);
+                            break;
+                    }
+                    memCurrentStep3++;
+                    if (memCurrentStep3 >= totalMemSteps3) {
+                       nextBtnMem3.disabled = true;
+                    }
+                }
+
+                function setupSlide3() {
+                    if (slide3.dataset.initialized) return;
+                    resetMemoryAnimation3();
+                    slide3.dataset.initialized = true;
+                }
+                
+                nextBtnMem3.addEventListener('click', executeMemoryStep3);
+                resetBtnMem3.addEventListener('click', resetMemoryAnimation3);
+
+                // Initial setup when slide becomes active
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.attributeName === 'class' && slide3.classList.contains('active')) {
+                           setupSlide3();
+                        }
+                    });
+                });
+                observer.observe(slide3, { attributes: true });
+                 if (slide3.classList.contains('active')) {
+                    setupSlide3();
+                }
+
+            }
+
+
+            // Page Navigation
+            const slides = document.querySelectorAll('.slide');
+            const prevPageBtn = document.getElementById('prev-page');
+            const nextPageBtn = document.getElementById('next-page');
+            let currentPage = 0;
+
+            function showPage(pageIndex) {
+                slides.forEach((slide, index) => {
+                    slide.classList.toggle('active', index === pageIndex);
+                });
+                prevPageBtn.disabled = pageIndex === 0;
+                nextPageBtn.disabled = pageIndex === slides.length - 1;
+                currentPage = pageIndex;
+            }
+
+            prevPageBtn.addEventListener('click', () => {
+                if (currentPage > 0) {
+                    showPage(currentPage - 1);
+                }
+            });
+
+            nextPageBtn.addEventListener('click', () => {
+                if (currentPage < slides.length - 1) {
+                    showPage(currentPage + 1);
+                }
+            });
+
+            showPage(0);
+
+            // Generic allocate function to be reused
+            function allocateVariable(startIdx, size, type, name, value, container) {
+                const cells = container.querySelectorAll('.memory-cell');
+                for (let i = 0; i < size; i++) {
+                    const cell = cells[startIdx + i];
+                    cell.classList.add(type);
+                }
+
+                const firstCell = cells[startIdx];
+                
+                if (value !== undefined) {
+                    const valueDiv = document.createElement('div');
+                    valueDiv.className = 'value';
+                    valueDiv.textContent = value;
+                    if (size > 1) {
+                        valueDiv.style.width = `${52 * size - 2}px`;
+                    }
+                    firstCell.appendChild(valueDiv);
+                }
+                
+                const nameLabel = document.createElement('div');
+                nameLabel.className = 'var-name';
+                nameLabel.textContent = name;
+                
+                if(size > 1) {
+                        nameLabel.style.width = `${52 * size - 2}px`;
+                }
+                
+                if (type === 'padding') {
+                    nameLabel.style.textAlign = 'left';
+                    nameLabel.style.paddingLeft = '10px';
+                    // Vertically center it too, like a value label
+                    nameLabel.style.bottom = 'auto';
+                    nameLabel.style.top = '50%';
+                    nameLabel.style.transform = 'translateY(-50%)';
+                }
+
+                firstCell.appendChild(nameLabel);
+
+                return cells[startIdx];
+            }
+        });
+    </script>
+</body>
+</html>
